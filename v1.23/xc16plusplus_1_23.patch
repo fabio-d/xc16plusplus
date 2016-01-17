@@ -1,0 +1,418 @@
+diff --git a/build_XC16_451 b/build_XC16_451
+index a772b25..c9ad122 100755
+--- a/build_XC16_451
++++ b/build_XC16_451
+@@ -25,7 +25,9 @@ while [ "$DONE" = "0" ]; do
+   else
+     case $1 in
+       -user)
+-         BUGURL="email:`whoami`@`hostname`"
++         #BUGURL="email:`whoami`@`hostname`"
++         #BUGURL="email:fabiodurso@hotmail.it"
++         BUGURL="https://github.com/fabio-d/xc16plusplus/issues"
+          EXTRA_DEFINES="-DRESOURCE_MISMATCH_OK"
+          shift 1;;
+       -install=*) 
+@@ -184,7 +186,7 @@ mkdir -p ppl
+   export CFLAGS=-m32
+   export CXXFLAGS=-m32
+ 
+-  CXXFLAGS="$EXTRA_CFLAGS $OPT" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
++  CXXFLAGS="$EXTRA_CFLAGS $OPT -fpermissive" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
+ 
+   make -j 2 install
+ )
+@@ -237,7 +239,7 @@ mkdir -p zlib
+   # note to self: I think the configure will now set AR=,CC= and such for me
+ 
+   # if [ "$CROSS" != "" ]; then
+-    make CFLAGS="$EXTRA_CFLAGS $OPT" RANLIB="${ZLIB_TOOLS}-ranlib" LDSBARED="${ZLIB_TOOLS}-gcc" AR="${ZLIB_TOOLS}-ar" CC="${ZLIB_TOOLS}-gcc"  prefix=$WORKING_DIR//host-libs install
++    make CFLAGS="$EXTRA_CFLAGS $OPT" prefix=$WORKING_DIR//host-libs install
+   # else
+   #   make install
+   # fi
+@@ -271,10 +273,10 @@ mkdir -p gcc
+   fi
+ 
+   echo "{"
+-  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
++  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
+   echo "}"
+ 
+-  CXXFLAGS="$EXTRA_CFLAGS $OPT" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS="$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl="${BUGURL}" --with-host-libstdcxx="$STATIC"
++  CXXFLAGS="$EXTRA_CFLAGS $OPT" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS="$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl="${BUGURL}" --with-host-libstdcxx="$STATIC"
+ 
+ 
+   
+diff --git a/src/XC_GCC/gcc/gcc/config.gcc b/src/XC_GCC/gcc/gcc/config.gcc
+index 4e21c5d..04ea561 100644
+--- a/src/XC_GCC/gcc/gcc/config.gcc
++++ b/src/XC_GCC/gcc/gcc/config.gcc
+@@ -2043,8 +2043,9 @@ pic30-*-coff)
+         host_xm_defines="OMF=\\\"coff\\\" ${host_xm_defines}"
+         extra_modes=pic30/pic30-modes.h
+         c_target_objs=pic30-c.o
++        cxx_target_objs=pic30-c.o
+         extra_objs="${extra_objs} cci-backend.o mchp_sha.o sha256.o"
+-        LANGUAGES="c"
++        LANGUAGES="c,c++"
+         LIBGCCMK=
+         ;;
+ pic30-*-elf)
+@@ -2056,8 +2057,9 @@ pic30-*-elf)
+         host_xm_defines="OMF=\\\"elf\\\" ${host_xm_defines}"
+         extra_modes=pic30/pic30-modes.h
+         c_target_objs=pic30-c.o
++        cxx_target_objs=pic30-c.o
+         extra_objs="${extra_objs} cci-backend.o mchp_sha.o sha256.o"
+-        LANGUAGES="c"
++        LANGUAGES="c,c++"
+         LIBGCCMK=
+         ;;
+ pic32*-mchp-elf*)
+diff --git a/src/XC_GCC/gcc/gcc/cp/cfns.h b/src/XC_GCC/gcc/gcc/cp/cfns.h
+index 62cdfab..4f63cc4 100644
+--- a/src/XC_GCC/gcc/gcc/cp/cfns.h
++++ b/src/XC_GCC/gcc/gcc/cp/cfns.h
+@@ -53,6 +53,9 @@ __inline
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ /* maximum key range = 391, duplicates = 0 */
+@@ -96,7 +99,7 @@ hash (register const char *str, register unsigned int len)
+       400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+       400, 400, 400, 400, 400, 400, 400
+     };
+-  register int hval = len;
++  register int hval = (int)len;
+ 
+   switch (hval)
+     {
+diff --git a/src/XC_GCC/gcc/gcc/cp/decl.c b/src/XC_GCC/gcc/gcc/cp/decl.c
+index c65a5a0..3beced2 100644
+--- a/src/XC_GCC/gcc/gcc/cp/decl.c
++++ b/src/XC_GCC/gcc/gcc/cp/decl.c
+@@ -13009,4 +13009,14 @@ cxx_comdat_group (tree decl)
+   return name;
+ }
+ 
++// HACK to solve missing symbol in pic30.c
++#define I_SYMBOL_BINDING(node) \
++  (((struct lang_identifier *) IDENTIFIER_NODE_CHECK(node))->bindings)
++#define I_SYMBOL_DECL(node) \
++ (I_SYMBOL_BINDING(node) ? I_SYMBOL_BINDING(node)->value : 0)
++
++tree c_identifier_binding(tree node) {
++  return I_SYMBOL_DECL(node);
++}
++
+ #include "gt-cp-decl.h"
+diff --git a/src/XC_GCC/gcc/gcc/cp/mangle.c b/src/XC_GCC/gcc/gcc/cp/mangle.c
+index e1527fe..c383d0c 100644
+--- a/src/XC_GCC/gcc/gcc/cp/mangle.c
++++ b/src/XC_GCC/gcc/gcc/cp/mangle.c
+@@ -60,6 +60,14 @@ along with GCC; see the file COPYING3.  If not see
+ #include "target.h"
+ #include "cgraph.h"
+ 
++#ifdef OBJECT_FORMAT_ELF
++/* HACK, the pic30 elf target has USER_LABEL_PREFIX="_", so the initial
++ * underscore will be added anyway */
++#define PIC30_MANGLE_PREFIX "Z"
++#else
++#define PIC30_MANGLE_PREFIX "_Z"
++#endif
++
+ /* Debugging support.  */
+ 
+ /* Define DEBUG_MANGLE to enable very verbose trace messages.  */
+@@ -646,7 +654,7 @@ write_mangled_name (const tree decl, bool top_level)
+ 	     overloaded operators that way though, because it contains
+ 	     characters invalid in assembler.  */
+ 	  if (abi_version_at_least (2))
+-	    write_string ("_Z");
++	    write_string (PIC30_MANGLE_PREFIX);
+ 	  else
+ 	    G.need_abi_warning = true;
+ 	  write_source_name (DECL_NAME (decl));
+@@ -670,7 +678,7 @@ write_mangled_name (const tree decl, bool top_level)
+   else
+     {
+     mangled_name:;
+-      write_string ("_Z");
++      write_string (PIC30_MANGLE_PREFIX);
+       write_encoding (decl);
+       if (DECL_LANG_SPECIFIC (decl)
+ 	  && (DECL_MAYBE_IN_CHARGE_DESTRUCTOR_P (decl)
+@@ -2769,7 +2777,7 @@ write_template_arg (tree node)
+ 	  write_char ('Z');
+ 	}
+       else
+-	write_string ("_Z");
++	write_string (PIC30_MANGLE_PREFIX);
+       write_encoding (node);
+       write_char ('E');
+     }
+@@ -3127,7 +3135,7 @@ mangle_special_for_type (const tree type, const char *code)
+   start_mangling (type);
+ 
+   /* Start the mangling.  */
+-  write_string ("_Z");
++  write_string (PIC30_MANGLE_PREFIX);
+   write_string (code);
+ 
+   /* Add the type.  */
+@@ -3196,7 +3204,7 @@ mangle_ctor_vtbl_for_type (const tree type, const tree binfo)
+ 
+   start_mangling (type);
+ 
+-  write_string ("_Z");
++  write_string (PIC30_MANGLE_PREFIX);
+   write_string ("TC");
+   write_type (type);
+   write_integer_cst (BINFO_OFFSET (binfo));
+@@ -3253,7 +3261,7 @@ mangle_thunk (tree fn_decl, const int this_adjusting, tree fixed_offset,
+ 
+   start_mangling (fn_decl);
+ 
+-  write_string ("_Z");
++  write_string (PIC30_MANGLE_PREFIX);
+   write_char ('T');
+ 
+   if (!this_adjusting)
+@@ -3358,8 +3366,8 @@ tree
+ mangle_guard_variable (const tree variable)
+ {
+   start_mangling (variable);
+-  write_string ("_ZGV");
+-  if (strncmp (IDENTIFIER_POINTER (DECL_NAME (variable)), "_ZGR", 4) == 0)
++  write_string (PIC30_MANGLE_PREFIX "GV");
++  if (strncmp (IDENTIFIER_POINTER (DECL_NAME (variable)), PIC30_MANGLE_PREFIX "GR", 4) == 0)
+     /* The name of a guard variable for a reference temporary should refer
+        to the reference, not the temporary.  */
+     write_string (IDENTIFIER_POINTER (DECL_NAME (variable)) + 4);
+@@ -3376,7 +3384,7 @@ tree
+ mangle_ref_init_variable (const tree variable)
+ {
+   start_mangling (variable);
+-  write_string ("_ZGR");
++  write_string (PIC30_MANGLE_PREFIX "GR");
+   write_name (variable, /*ignore_local_scope=*/0);
+   return finish_mangling_get_identifier (/*warn=*/false);
+ }
+diff --git a/src/XC_GCC/gcc/gcc/cp/method.c b/src/XC_GCC/gcc/gcc/cp/method.c
+index 5ed98bc..2ce5544 100644
+--- a/src/XC_GCC/gcc/gcc/cp/method.c
++++ b/src/XC_GCC/gcc/gcc/cp/method.c
+@@ -312,7 +312,7 @@ use_thunk (tree thunk_fndecl, bool emit_p)
+   if (!emit_p)
+     return;
+ 
+-  if (TARGET_USE_LOCAL_THUNK_ALIAS_P (function))
++  if (0 && TARGET_USE_LOCAL_THUNK_ALIAS_P (function))
+    alias = make_alias_for_thunk (function);
+   else
+    alias = function;
+diff --git a/src/XC_GCC/gcc/gcc/varasm.c b/src/XC_GCC/gcc/gcc/varasm.c
+index 9613748..fe1e000 100644
+--- a/src/XC_GCC/gcc/gcc/varasm.c
++++ b/src/XC_GCC/gcc/gcc/varasm.c
+@@ -1647,7 +1647,8 @@ default_stabs_asm_out_destructor (rtx symbol ATTRIBUTE_UNUSED,
+   dbxout_begin_simple_stabs ("___DTOR_LIST__", 22 /* N_SETT */);
+   dbxout_stab_value_label (XSTR (symbol, 0));
+ #else
+-  sorry ("global destructors not supported on this target");
++  // sorry ("global destructors not supported on this target");
++  // silently ignore, there is no need to call global dtors on a PIC
+ #endif
+ }
+ 
+@@ -1723,7 +1724,10 @@ default_stabs_asm_out_constructor (rtx symbol ATTRIBUTE_UNUSED,
+   dbxout_begin_simple_stabs ("___CTOR_LIST__", 22 /* N_SETT */);
+   dbxout_stab_value_label (XSTR (symbol, 0));
+ #else
+-  sorry ("global constructors not supported on this target");
++  //sorry ("global constructors not supported on this target");
++    fprintf(asm_out_file, "\t.pushsection .user_init,code\n");
++    assemble_integer_with_op("\tcall ", symbol);
++    fprintf(asm_out_file, "\t.popsection\n");
+ #endif
+ }
+ 
+diff --git a/src/XC_GCC/ppl/src/Congruence_System.defs.hh b/src/XC_GCC/ppl/src/Congruence_System.defs.hh
+index 0a9e186..96bb05a 100644
+--- a/src/XC_GCC/ppl/src/Congruence_System.defs.hh
++++ b/src/XC_GCC/ppl/src/Congruence_System.defs.hh
+@@ -31,6 +31,7 @@ site: http://www.cs.unipr.it/ppl/ . */
+ #include "Matrix.defs.hh"
+ #include "Grid_Certificate.types.hh"
+ #include <iosfwd>
++#include <cstddef>
+ 
+ namespace Parma_Polyhedra_Library {
+ 
+@@ -233,7 +234,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Congruence,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Congruence*,
+ 			   const Congruence&> {
+   public:
+diff --git a/src/XC_GCC/ppl/src/Constraint_System.defs.hh b/src/XC_GCC/ppl/src/Constraint_System.defs.hh
+index c35c5e1..f06a07e 100644
+--- a/src/XC_GCC/ppl/src/Constraint_System.defs.hh
++++ b/src/XC_GCC/ppl/src/Constraint_System.defs.hh
+@@ -32,6 +32,7 @@ site: http://www.cs.unipr.it/ppl/ . */
+ #include "Congruence_System.types.hh"
+ #include <iterator>
+ #include <iosfwd>
++#include <cstddef>
+ 
+ namespace Parma_Polyhedra_Library {
+ 
+@@ -197,7 +198,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Constraint,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Constraint*,
+ 			   const Constraint&> {
+   public:
+diff --git a/src/XC_GCC/ppl/src/Generator_System.defs.hh b/src/XC_GCC/ppl/src/Generator_System.defs.hh
+index f9e7903..6d75e4b 100644
+--- a/src/XC_GCC/ppl/src/Generator_System.defs.hh
++++ b/src/XC_GCC/ppl/src/Generator_System.defs.hh
+@@ -33,6 +33,7 @@ site: http://www.cs.unipr.it/ppl/ . */
+ #include "Poly_Con_Relation.defs.hh"
+ #include "Grid.types.hh"
+ #include <iosfwd>
++#include <cstddef>
+ 
+ namespace Parma_Polyhedra_Library {
+ 
+@@ -250,7 +251,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Generator,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Generator*,
+ 			   const Generator&> {
+   public:
+diff --git a/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh b/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
+index 2fa3770..0a80606 100644
+--- a/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
++++ b/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
+@@ -28,6 +28,7 @@ site: http://www.cs.unipr.it/ppl/ . */
+ #include "Grid_Generator.types.hh"
+ #include "Variables_Set.types.hh"
+ #include <iosfwd>
++#include <cstddef>
+ 
+ namespace Parma_Polyhedra_Library {
+ 
+@@ -265,7 +266,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Grid_Generator,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Grid_Generator*,
+ 			   const Grid_Generator&>,
+       private Generator_System::const_iterator {
+diff --git a/src/XC_GCC/ppl/src/ppl.hh.dist b/src/XC_GCC/ppl/src/ppl.hh.dist
+index 6226c45..81db1c4 100644
+--- a/src/XC_GCC/ppl/src/ppl.hh.dist
++++ b/src/XC_GCC/ppl/src/ppl.hh.dist
+@@ -692,6 +692,7 @@ class stdiobuf;
+ /* Automatically generated from PPL source file ../src/stdiobuf.defs.hh line 27. */
+ #include <cstdio>
+ #include <streambuf>
++#include <cstddef>
+ 
+ class Parma_Polyhedra_Library::stdiobuf
+   : public std::basic_streambuf<char, std::char_traits<char> > {
+@@ -16911,7 +16912,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Constraint,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Constraint*,
+ 			   const Constraint&> {
+   public:
+@@ -18464,7 +18465,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Generator,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Generator*,
+ 			   const Generator&> {
+   public:
+@@ -20151,7 +20152,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Congruence,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Congruence*,
+ 			   const Congruence&> {
+   public:
+@@ -21334,7 +21335,7 @@ public:
+   class const_iterator
+     : public std::iterator<std::forward_iterator_tag,
+ 			   Grid_Generator,
+-			   ptrdiff_t,
++			   std::ptrdiff_t,
+ 			   const Grid_Generator*,
+ 			   const Grid_Generator&>,
+       private Generator_System::const_iterator {
+diff --git a/src_build.sh b/src_build.sh
+index 2740d06..a8b3e05 100755
+--- a/src_build.sh
++++ b/src_build.sh
+@@ -15,18 +15,21 @@ case $OS in
+              CC="gcc"
+              EXTRA_CFLAGS=""
+              ACME_CONFIGURE="--target=pic30-@omf --host=i386-darwin"
++             HOST="i386-darwin"
+              EXE=""
+              ;;
+   CYGWIN*) OS="Windows/Cygwin"
+              CC="i686-pc-mingw32-gcc"
+              EXTRA_CFLAGS=""
+              ACME_CONFIGURE="--target=pic30-@omf --host=i386-pc-mingw32"
++             HOST="i386-pc-mingw32"
+              EXE=".exe"
+              ;;
+   *)       OS="Linux/Unknown"
+              CC="gcc"
+              EXTRA_CFLAGS=""
+              ACME_CONFIGURE="--target=pic30-@omf --host=i386-linux"
++             HOST="i386-linux"
+              EXE=""
+              ;;
+ esac
+@@ -62,10 +65,12 @@ mkdir bin
+     (
+        cd gcc-${OMF}-native
+        export EXTRA_CFLAGS
+-       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=i686-pc-mingw32-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v0_00
++       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=$HOST-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v1.23
+        cp gcc/gcc/xgcc${EXE} ${install_dir}/bin/bin/${OMF}-gcc${EXE}
+        cp gcc/gcc/cc1${EXE} ${install_dir}/bin/bin/${OMF}-cc1${EXE}
+        cp gcc/gcc/cpp${EXE} ${install_dir}/bin/bin/${OMF}-cpp${EXE}
++       cp gcc/gcc/g++${EXE} ${install_dir}/bin/bin/${OMF}-g++${EXE}
++       cp gcc/gcc/cc1plus${EXE} ${install_dir}/bin/bin/${OMF}-cc1plus${EXE}
+     )
+   done
+ 
