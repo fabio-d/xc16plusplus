@@ -25,21 +25,24 @@ software libraries, linker scripts and even some pieces of the compiler
 infrastructure are proprietary.
 
 ## Installation on top of an existing XC16 installation
-**Important**: Please note that **I only test 32-bit builds** and my experience
-is that it is not trivial to build XC16 as a 32-bit executable on a 64-bit host
-(for example, even with the `CC='gcc -m32'` option, `libtool` still tries to
-link 64-bit libraries during the build process on Fedora 22). Therefore, if you
-are on a 64-bit OS, usage of a VM or a 32-bit chroot to run the compilation
-process is strongly recommended.
 
- 1. Download the official Microship source code for your XC16 version and unpack
-    it
- 2. Patch the source code using the patch file that is most appropriate for your
+### Linux
+
+**Important**: Please note that **I only test 32-bit builds** and my experience
+is that it is not trivial to build XC16 as a 32-bit executable on a 64-bit Linux
+host (for example, even with the `CC='gcc -m32'` option, `libtool` still tries
+to link 64-bit libraries during the build process on Fedora 22). Therefore, if
+you are on a 64-bit Linux OS, usage of a VM or a 32-bit chroot to run the
+compilation process is strongly recommended.
+
+ 1. Install `bison`, `flex`, `libstdc++-static` and `m4` as well as the standard
+    set of build tools (incl. `make`, C and C++ compiler).
+ 2. Download the official Microchip source code for your XC16 version and unpack
+    it (e.g. `unzip xc16-v1.24-src.zip`)
+ 3. Patch the source code using the patch file that is most appropriate for your
     version, for example:
     <pre>cd /path/to/v1.24.src/
     patch -p1 < /path/to/xc16plusplus_1_24.patch</pre>
- 3. Install `bison`, `flex`, `libstdc++-static` and `m4` as well as the standard
-    set of build tools (incl. `make`, C and C++ compiler).
  4. Run `./src_build.sh`.
  5. When the compilation process ends you will see some errors about `libgcc`,
     but they are expected. You should now have the following executables in your
@@ -51,10 +54,20 @@ process is strongly recommended.
      * `elf-g++` &rarr; `/opt/microchip/xc16/v1.24/bin/bin/elf-g++`
  6. *(Only if you are using a VM or chroot to build XC16++)* Copy the previous
     files out of the VM/chroot and go back to your main system.
- 7. Finally, run the following commands:
+ 7. Lastly, run the following commands:
     <pre>cd /opt/microchip/xc16/v1.24/bin/
     ln -s xc16-cc1 xc16-cc1plus
     ln -s xc16-gcc xc16-g++</pre>
+
+### Windows
+
+Windows executables can be compiled in Cygwin through MinGW. The resulting
+executables will not depend on any Cygwin or MinGW library and, therefore, can
+safely be copied to other systems. **I only test 32-bit builds**: even if you
+have 64-bit Windows, follow the following steps literally, so that you will
+obtain 32-bit executables.
+
+TODO
 
 ## Limitations
  * There is no libstdc++, therefore all C++ features that rely on external

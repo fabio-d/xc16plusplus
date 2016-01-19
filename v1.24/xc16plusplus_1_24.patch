@@ -1,5 +1,5 @@
 diff --git a/build_XC16_451 b/build_XC16_451
-index 891d75b..9e2fe20 100755
+index 891d75b..9018ae9 100755
 --- a/build_XC16_451
 +++ b/build_XC16_451
 @@ -41,7 +41,9 @@ while [ "$DONE" = "0" ]; do
@@ -13,18 +13,37 @@ index 891d75b..9e2fe20 100755
           EXTRA_DEFINES="-DRESOURCE_MISMATCH_OK"
           shift 1;;
        -install=*) 
-@@ -202,7 +204,7 @@ mkdir -p ppl
+@@ -184,8 +186,12 @@ echo
+ mkdir -p gmp
+ ( cd gmp
+ 
++  if ( echo $BUILD_OS | grep -q -i "cygwin" ); then
++     ( cd $SRC_DIR/gmp && autoconf )
++  fi
++
+ #  ABI=32 $SRC_DIR/gmp/configure --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC -lm"
+-  ABI=32 CXXFLAGS="$EXTRA_CFLAGS $OPT" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/gmp/configure ${CROSS} --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC" --build=$BUILD_OS
++  ABI=32 CXXFLAGS="$EXTRA_CFLAGS $OPT -static-libgcc -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/gmp/configure ${CROSS} --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC" --build=$BUILD_OS
+ 
+   make -j 2 install
+ )
+@@ -202,7 +208,7 @@ mkdir -p ppl
    export CFLAGS=-m32
    export CXXFLAGS=-m32
  
 -  CXXFLAGS="$EXTRA_CFLAGS $OPT" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
-+  CXXFLAGS="$EXTRA_CFLAGS $OPT -fpermissive" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
++  CXXFLAGS="$EXTRA_CFLAGS $OPT -fpermissive -static-libgcc -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
  
    make -j 2 install
  )
-@@ -294,10 +296,10 @@ mkdir -p gcc
+@@ -293,11 +299,15 @@ mkdir -p gcc
+     DWARF="--with-dwarf2"
    fi
  
++  if ( echo $BUILD_OS | grep -q -i "cygwin" ); then
++     CROSS=--host=i686-pc-mingw32
++  fi
++
    echo "{"
 -  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
 +  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
@@ -35,6 +54,19 @@ index 891d75b..9e2fe20 100755
  
  
    
+diff --git a/src/XC_GCC/gcc/gcc/Makefile.in b/src/XC_GCC/gcc/gcc/Makefile.in
+index 1b3dca5..495580f 100644
+--- a/src/XC_GCC/gcc/gcc/Makefile.in
++++ b/src/XC_GCC/gcc/gcc/Makefile.in
+@@ -1802,7 +1802,7 @@ cpp$(exeext): $(GCC_OBJS) cppspec.o version.o intl.o prefix.o \
+ 
+ # Dump a specs file to make -B./ read these specs over installed ones.
+ $(SPECS): xgcc$(exeext)
+-	$(GCC_FOR_TARGET) -dumpspecs > tmp-specs
++	./xgcc$(exeext) -dumpspecs > tmp-specs
+ 	mv tmp-specs $(SPECS)
+ 
+ # We do want to create an executable named `xgcc', so we can use it to
 diff --git a/src/XC_GCC/gcc/gcc/c-common.c b/src/XC_GCC/gcc/gcc/c-common.c
 index 13917af..c5bb17a 100644
 --- a/src/XC_GCC/gcc/gcc/c-common.c
@@ -389,12 +421,35 @@ index 6226c45..81db1c4 100644
  			   const Grid_Generator*,
  			   const Grid_Generator&>,
        private Generator_System::const_iterator {
+diff --git a/src/acme/binutils/bucomm.h b/src/acme/binutils/bucomm.h
+index 2598d13..0134763 100755
+--- a/src/acme/binutils/bucomm.h
++++ b/src/acme/binutils/bucomm.h
+@@ -23,6 +23,7 @@
+ 
+ #include "ansidecl.h"
+ #include <stdio.h>
++#include <sys/stat.h>
+ #include <sys/types.h>
+ 
+ #include "config.h"
 diff --git a/src_build.sh b/src_build.sh
-index 2740d06..0636837 100755
+index 2740d06..031c819 100755
 --- a/src_build.sh
 +++ b/src_build.sh
-@@ -15,18 +15,21 @@ case $OS in
+@@ -6,6 +6,7 @@ OS=`uname -s`
+ 
+ export OS
+ export CC
++export CXX
+ export EXTRA_CFLAGS
+ export ACME_CONFIGURE
+ export EXE
+@@ -13,20 +14,26 @@ export EXE
+ case $OS in
+   Darwin)  OS="OS/X"
               CC="gcc"
++             CXX="g++"
               EXTRA_CFLAGS=""
               ACME_CONFIGURE="--target=pic30-@omf --host=i386-darwin"
 +             HOST="i386-darwin"
@@ -402,6 +457,7 @@ index 2740d06..0636837 100755
               ;;
    CYGWIN*) OS="Windows/Cygwin"
               CC="i686-pc-mingw32-gcc"
++             CXX="i686-pc-mingw32-g++"
               EXTRA_CFLAGS=""
               ACME_CONFIGURE="--target=pic30-@omf --host=i386-pc-mingw32"
 +             HOST="i386-pc-mingw32"
@@ -409,13 +465,14 @@ index 2740d06..0636837 100755
               ;;
    *)       OS="Linux/Unknown"
               CC="gcc"
++             CXX="g++"
               EXTRA_CFLAGS=""
               ACME_CONFIGURE="--target=pic30-@omf --host=i386-linux"
 +             HOST="i386-linux"
               EXE=""
               ;;
  esac
-@@ -62,10 +65,12 @@ mkdir bin
+@@ -62,10 +69,12 @@ mkdir bin
      (
         cd gcc-${OMF}-native
         export EXTRA_CFLAGS
