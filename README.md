@@ -39,7 +39,7 @@ compilation process is strongly recommended.
     set of build tools (incl. `make`, C and C++ compiler).
  2. Download the official Microchip source code for your XC16 version and unpack
     it (e.g. `unzip xc16-v1.24-src.zip`)
- 3. Patch the source code using the patch file that is most appropriate for your
+ 3. Patch the source code using the patch file that is appropriate for your
     version, for example:
     <pre>cd /path/to/v1.24.src/
     patch -p1 < /path/to/xc16plusplus_1_24.patch</pre>
@@ -67,7 +67,35 @@ safely be copied to other systems. **I only test 32-bit builds**: even if you
 have 64-bit Windows, follow the following steps literally, so that you will
 obtain 32-bit executables.
 
-TODO
+ 1. Install [Cygwin for 32-bit versions of Windows](http://cygwin.com/install.html)
+    (even if your OS is 64-bit). In addition to the default packages, also
+    select binary `gcc-core`, `gcc-g++`, `mingw-gcc-core`, `mingw-gcc-g++`,
+    `gettext-devel`, `autoconf`, `bison`, `flex` and `m4` in the package
+    selection screen during the installation procedure (you can use the search
+    box in the top-left corner of the installer screen to find them).
+ 2. Download the official Microchip source code for your XC16 version and unpack
+    it under `C:\cygwin\home\yourusername\`
+ 3. Download the patch file that is appropriate for your version and save it
+    under `C:\cygwin\home\yourusername\`
+ 3. Open the Cygwin terminal and patch the source code using the patch file
+    you downloaded, for example:
+    <pre>cd v1.24.src/
+    patch -p1 < ../xc16plusplus_1_24.patch</pre>
+ 4. Run `./src_build.sh`.
+ 5. When the compilation process ends you will see some errors about `libgcc`,
+    but they are expected. You should now have the following executables in your
+    build tree under `v1.24.src\install\bin\bin\` that must be copied to their
+    final location:
+     * `coff-cc1plus.exe` &rarr; `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin\coff-cc1plus.exe`
+     * `coff-g++.exe` &rarr; `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin\coff-g++.exe`
+     * `elf-cc1plus.exe` &rarr; `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin\elf-cc1plus.exe`
+     * `elf-g++.exe` &rarr; `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin\elf-g++.exe`
+ 7. Lastly, run the following commands in the Command Prompt (as administrator):
+    <pre>cd "\Program Files (x86)\Microchip\xc16\v1.24\bin"
+    mklink xc16-cc1plus.exe xc16-cc1.exe
+    mklink "xc16-g++.exe" xc16-gcc.exe</pre>
+    (if the `mklink` command is not available, you can simply copy files intead
+    of linking them)
 
 ## Limitations
  * There is no libstdc++, therefore all C++ features that rely on external
