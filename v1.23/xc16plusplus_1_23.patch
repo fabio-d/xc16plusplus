@@ -1,5 +1,5 @@
 diff --git a/build_XC16_451 b/build_XC16_451
-index a772b25..ecd3751 100755
+index a772b25..bcef950 100755
 --- a/build_XC16_451
 +++ b/build_XC16_451
 @@ -25,7 +25,9 @@ while [ "$DONE" = "0" ]; do
@@ -13,7 +13,30 @@ index a772b25..ecd3751 100755
           EXTRA_DEFINES="-DRESOURCE_MISMATCH_OK"
           shift 1;;
        -install=*) 
-@@ -166,8 +168,12 @@ echo
+@@ -146,8 +148,22 @@ fi
+ if [ "$BUILD_OS" != "i386-darwin" ]; then
+   BUILD="$BUILD ppl"
+   STATIC="-Wl,-Bstatic,-lstdc++,-Bdynamic,-lm"
++  CXX_STATIC_LIBGCC=-static-libgcc
+ fi
+ 
++# The official XC16 releases have no PPL/CLOOG features (xc16-gcc -v shows that
++# gcc's configure script was given internal paths for both libraries by this
++# script, but they must have been invalid builds). On OSX the same applies to
++# ZLIB too: gcc's configure was given an internal zlib path by this script, but
++# the final executables are dynamically linked to the system one. To match this
++# behavior and to save some compilation time, let's not even attempt to build
++# such libraries:
++BUILD=$(echo $BUILD | sed -e 's/ppl//' -e 's/cloog//')
++if [ "$TARGET_OS" = "i386-darwin" ]; then
++  BUILD=$(echo $BUILD | sed -e 's/zlib//')
++fi
++echo "BUILD=$BUILD"
++
+ if ( echo $EXTRA_CFLAGS | grep -q -e "cover" ); then
+   OPT=
+ else
+@@ -166,8 +182,12 @@ echo
  mkdir -p gmp
  ( cd gmp
  
@@ -23,20 +46,20 @@ index a772b25..ecd3751 100755
 +
  #  ABI=32 $SRC_DIR/gmp/configure --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC -lm"
 -  ABI=32 CXXFLAGS="$EXTRA_CFLAGS $OPT" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/gmp/configure ${CROSS} --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC" --build=$BUILD_OS
-+  ABI=32 CXXFLAGS="$EXTRA_CFLAGS $OPT -static-libgcc -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/gmp/configure ${CROSS} --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC" --build=$BUILD_OS
++  ABI=32 CXXFLAGS="$EXTRA_CFLAGS $OPT $CXX_STATIC_LIBGCC -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/gmp/configure ${CROSS} --enable-cxx --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-gnu-ld --disable-debug --disable-rpath --enable-fft --enable-hash-synchronization --with-host-libstdcxx="-static-libgcc $STATIC" --build=$BUILD_OS
  
    make -j 2 install
  )
-@@ -184,7 +190,7 @@ mkdir -p ppl
+@@ -184,7 +204,7 @@ mkdir -p ppl
    export CFLAGS=-m32
    export CXXFLAGS=-m32
  
 -  CXXFLAGS="$EXTRA_CFLAGS $OPT" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
-+  CXXFLAGS="$EXTRA_CFLAGS $OPT -fpermissive -static-libgcc -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
++  CXXFLAGS="$EXTRA_CFLAGS $OPT -fpermissive $CXX_STATIC_LIBGCC -static-libstdc++" CFLAGS="$EXTRA_CFLAGS $OPT" $SRC_DIR/ppl/configure ${CROSS} $PPL_FLAGS --enable-arch=no --prefix=$WORKING_DIR//host-libs --disable-shared --enable-static --disable-nls --with-libgmp-prefix=$WORKING_DIR//host-libs --with-gmp=$WORKING_DIR//host-libs --enable-optimization=speed --disable-rpath --with-gnu-ld --with-host-libstdcxx="-static-libgcc $STATIC -lm" --build=$BUILD_OS
  
    make -j 2 install
  )
-@@ -237,7 +243,7 @@ mkdir -p zlib
+@@ -237,7 +257,7 @@ mkdir -p zlib
    # note to self: I think the configure will now set AR=,CC= and such for me
  
    # if [ "$CROSS" != "" ]; then
@@ -45,7 +68,7 @@ index a772b25..ecd3751 100755
    # else
    #   make install
    # fi
-@@ -270,11 +276,15 @@ mkdir -p gcc
+@@ -270,11 +290,15 @@ mkdir -p gcc
      DWARF="--with-dwarf2"
    fi
  
