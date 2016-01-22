@@ -11,13 +11,16 @@ TARGET_FAMILY := dsPIC33F
 #your own values
 
 # Change this to match your XC16 and XC16++ version and path
-XC16DIR := /opt/microchip/xc16/v1.24
-#XC16DIR := "C:\Program Files (x86)\Microchip\xc16\v1.24"
-#XC16DIR := /Applications/microchip/xc16/v1.24
+XC16DIR := /opt/microchip/xc16/v1.25
+#XC16DIR := "C:\Program Files (x86)\Microchip\xc16\v1.25"
+#XC16DIR := /Applications/microchip/xc16/v1.25
 SUPPORTFILESDIR := ../support-files
 
 # Example options for the C compiler
-CFLAGS := -mcpu=$(TARGET_CHIP) -mno-eds-warn
+# Option -no-legacy-libc is only necessary for xc16 >= v1.25, older versions
+# will not understand it and print a warning message, but it will not harm the
+# compilation process
+CFLAGS := -mcpu=$(TARGET_CHIP) -mno-eds-warn -no-legacy-libc
 
 # Example options for the C++ compiler. Note that -fno-exceptions -fno-rtti
 # are always required because this compiler does not support neither exceptions
