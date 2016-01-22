@@ -103,6 +103,50 @@ obtain 32-bit executables.
     (if the `mklink` command is not available, you can simply copy files intead
     of linking them)
 
+### OS X
+
+The official XC16 release targets OS X 10.5 and later ones. The 10.5 SDK is
+therefore required if you want to create executables that can be used on every
+system where XC16 itself can be executed. However, if you are only interested in
+being able to run the C++ compiler on your computer, **any SDK will do** (but a
+small manual edit to *build_XC16_451* will be necessary). In both cases, keep in
+mind that **I only test 32 builds**, so make sure you always set *-arch i386*
+(see step 4 for more details).
+
+ 1. Install the command line tools. As of OS X 10.9 it is as easy as running
+    ` xcode-select --install` from the terminal and following the instructions.
+    For older OS X version, please refer to [the *Install Xcode* section of the
+    MacPorts manual](https://guide.macports.org/chunked/installing.xcode.html).
+ 2. Download the official Microchip source code for your XC16 version and unpack
+    it (e.g. `unzip xc16-v1.24-src.zip`)
+ 3. Patch the source code using the patch file that is appropriate for your
+    version, for example:
+    <pre>cd /path/to/v1.24.src/
+    patch -p1 < /path/to/xc16plusplus_1_24.patch</pre>
+ 4. This is the SDK selection step. Open *build_XC16_451* in a text editor,
+    scroll to the line
+    <pre>EXTRA_CFLAGS="-arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk -mmacosx-version-min=10.5"</pre>
+    and edit it as needed. Unless you are trying to make a portable executable,
+    **it is probably easiest to use your system's default SDK, so change it to
+    just**
+    <pre>EXTRA_CFLAGS="-arch i386"</pre>
+ 5. Run `./src_build.sh`.
+ 6. When the compilation process ends you will see some errors about `libiconv`,
+    but they are expected. You should now have the following executables in your
+    build tree under `v1.24.src/install/bin/bin/`, that must be copied to
+    their final location:
+     * `coff-cc1plus` &rarr; `/Applications/microchip/xc16/v1.24/bin/bin/coff-cc1plus`
+     * `coff-g++` &rarr; `/Applications/microchip/xc16/v1.24/bin/bin/coff-g++`
+     * `elf-cc1plus` &rarr; `/Applications/microchip/xc16/v1.24/bin/bin/elf-cc1plus`
+     * `elf-g++` &rarr; `/Applications/microchip/xc16/v1.24/bin/bin/elf-g++`
+ 7. Lastly, run the following commands:
+    <pre>cd /Applications/microchip/xc16/v1.24/bin/
+    ln -s xc16-cc1 xc16-cc1plus
+    ln -s xc16-gcc xc16-g++
+    cd bin/
+    ln -s coff-pa coff-paplus
+    ln -s elf-pa elf-paplus</pre>
+
 ## Limitations
  * There is no libstdc++, therefore all C++ features that rely on external
    libraries are not available:
