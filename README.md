@@ -57,7 +57,10 @@ compilation process is strongly recommended.
  7. Lastly, run the following commands:
     <pre>cd /opt/microchip/xc16/v1.24/bin/
     ln -s xc16-cc1 xc16-cc1plus
-    ln -s xc16-gcc xc16-g++</pre>
+    ln -s xc16-gcc xc16-g++
+    cd bin/
+    ln -s coff-pa coff-paplus
+    ln -s elf-pa elf-paplus</pre>
 
 ### Windows
 
@@ -93,7 +96,10 @@ obtain 32-bit executables.
  7. Lastly, run the following commands in the Command Prompt (as administrator):
     <pre>cd "\Program Files (x86)\Microchip\xc16\v1.24\bin"
     mklink xc16-cc1plus.exe xc16-cc1.exe
-    mklink "xc16-g++.exe" xc16-gcc.exe</pre>
+    mklink "xc16-g++.exe" xc16-gcc.exe
+    cd bin
+    mklink coff-paplus.exe coff-pa.exe
+    mklink elf-paplus.exe elf-pa.exe</pre>
     (if the `mklink` command is not available, you can simply copy files intead
     of linking them)
 
