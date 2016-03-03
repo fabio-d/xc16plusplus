@@ -2,9 +2,9 @@
 
 This folder contains a simple LED-blinking project that shows how to invoke the
 C++ compiler, how to mix C and C++ source files in a project and how to write in
-C++ for PIC24/dsPIC24 chips. All code in this folder is released to public
-domain (see *LICENSE-UNLICENSE* in the parent directory), so you can use it as
-starting point for your projects.
+C++ for PIC24/dsPIC chips. All code in this folder is released to public domain
+(see *LICENSE-UNLICENSE* in the parent directory), so you can use it as starting
+point for your projects.
 
 ## Compiling and running the project
  1. Edit the first lines of the *Makefile* to set your target chip
