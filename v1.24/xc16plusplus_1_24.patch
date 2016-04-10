@@ -312,6 +312,19 @@ index bd4b23b..6d8bfea 100644
  #endif
  }
  
+diff --git a/src/XC_GCC/gcc/gcc/version.c b/src/XC_GCC/gcc/gcc/version.c
+index 3325a58..6931229 100644
+--- a/src/XC_GCC/gcc/gcc/version.c
++++ b/src/XC_GCC/gcc/gcc/version.c
+@@ -45,7 +45,7 @@ const char version_string[] = BASEVER " " "MPLAB XC32 Compiler v1.11"; /* XC32 *
+ #define version(X) version2(X)
+ 
+ char *version_string = BASEVER " " "(XC16, Microchip " version(MCHP_VERSION)
+-                       ") Build date: " __DATE__;
++                       ", XC16++ patch " version(XC16PLUSPLUS_VERSION) ") Build date: " __DATE__;
+ #else
+ 
+ const char version_string[] = BASEVER " " "MPLAB XC Compiler v1.10";
 diff --git a/src/XC_GCC/ppl/src/Congruence_System.defs.hh b/src/XC_GCC/ppl/src/Congruence_System.defs.hh
 index 0a9e186..96bb05a 100644
 --- a/src/XC_GCC/ppl/src/Congruence_System.defs.hh
@@ -457,18 +470,22 @@ index 2598d13..0134763 100755
  
  #include "config.h"
 diff --git a/src_build.sh b/src_build.sh
-index 2740d06..031c819 100755
+index 2740d06..7204780 100755
 --- a/src_build.sh
 +++ b/src_build.sh
-@@ -6,6 +6,7 @@ OS=`uname -s`
+@@ -4,8 +4,11 @@ THIS_DIR=`pwd`
  
+ OS=`uname -s`
+ 
++XC16PLUSPLUS_VERSION=v1
++
  export OS
  export CC
 +export CXX
  export EXTRA_CFLAGS
  export ACME_CONFIGURE
  export EXE
-@@ -13,20 +14,26 @@ export EXE
+@@ -13,20 +16,26 @@ export EXE
  case $OS in
    Darwin)  OS="OS/X"
               CC="gcc"
@@ -495,12 +512,12 @@ index 2740d06..031c819 100755
               EXE=""
               ;;
  esac
-@@ -62,10 +69,12 @@ mkdir bin
+@@ -62,10 +71,12 @@ mkdir bin
      (
         cd gcc-${OMF}-native
         export EXTRA_CFLAGS
 -       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=i686-pc-mingw32-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v0_00
-+       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=$HOST-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v1.24
++       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=$HOST-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v1.24 -DXC16PLUSPLUS_VERSION=$XC16PLUSPLUS_VERSION
         cp gcc/gcc/xgcc${EXE} ${install_dir}/bin/bin/${OMF}-gcc${EXE}
         cp gcc/gcc/cc1${EXE} ${install_dir}/bin/bin/${OMF}-cc1${EXE}
         cp gcc/gcc/cpp${EXE} ${install_dir}/bin/bin/${OMF}-cpp${EXE}
