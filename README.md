@@ -24,7 +24,17 @@ existing XC16 installation, because all Microchip-supplied header files,
 software libraries, linker scripts and even some pieces of the compiler
 infrastructure are proprietary.
 
-## Installation on top of an existing XC16 installation
+## Installation on top of an existing XC16 installation from binary packages
+
+Coming soon!
+
+## How to build the C++ compiler using `src_build.sh`
+
+`src_build.sh` is the script that comes with the official XC16 source release.
+It has been slightly patched to make it possible to build the C++ compiler
+natively on each supported platform. I also wrote an alternative script, that
+is described in the next section, which is probably easier to use, especially
+under 64-bit Linux.
 
 ### Linux
 
@@ -146,6 +156,35 @@ mind that **I only test 32 builds**, so make sure you always set *-arch i386*
     cd bin/
     ln -s coff-pa coff-paplus
     ln -s elf-pa elf-paplus</pre>
+
+## How to build the C++ compiler using `xc16plusplus_only.sh`
+
+This is an alternative build script that I wrote to automatically cross-compile
+the C++ compiler under Linux. It has only been tested on Fedora 22, but there is
+no reason why it should not work on other Linux distros.
+
+I recommend to use this script instead of `src_build.sh` when building a
+compiler for Linux on 64-bit Linux.
+
+ 1. Install `bison`, `flex`, `m4`, `make` and the compiler that is appropriate
+    for the OS you want to cross-compile for:
+     * A regular Linux `gcc` compiler if you want to build a compiler that runs
+       on Linux;
+     * `mingw32-gcc` if you want to build a compiler that runs on Windows;
+     * [osxcross](https://github.com/tpoechtrager/osxcross) if you want to
+       build a compiler that runs on OS X (use the `MacOSX10.5.sdk` SDK).
+ 2. Download the official Microchip source code for your XC16 version and unpack
+    it (e.g. `unzip xc16-v1.24-src.zip`)
+ 3. Patch the source code using the patch file that is appropriate for your
+    version, for example:
+    <pre>cd /path/to/v1.24.src/
+    patch -p1 < /path/to/xc16plusplus_1_24.patch</pre>
+ 4. Run `xc16plusplus_only.sh` and specify the OS you want to cross-compile for:
+     * `./xc16plusplus_only.sh linux` or
+     * `./xc16plusplus_only.sh win32` or
+     * `./xc16plusplus_only.sh osx`
+ 5. Install the resulting files on the target system as if you had used the
+    `src_build.sh` script.
 
 ## Limitations
  * There is no libstdc++, therefore all C++ features that rely on external
