@@ -1,49 +1,97 @@
 # XC16++ release repository
 
 ***Unofficial*** C++ compiler for PIC24 and dsPIC chips, based on the [official
-XC16 compiler from Microchip](http://www.microchip.com/pagehandler/en_us/devtools/mplabxc/).
+XC16 compiler from Microchip](https://www.microchip.com/mplab/compilers).
 It is neither endorsed nor supported in any form by Microchip.
+
+## Download
+
+Precompiled packages are available. They contain some executables that can be
+**added to an existing XC16 installation** to enable the C++ language (choose
+the one that matches your XC16 version). XC16++ precompiled executables, full
+source code and patches can be **downloaded at
+https://github.com/fabio-d/xc16plusplus/releases**.
+
+Installation instructions are provided below in this document.
+
+This repository (*xc16plusplus*) only contains source code in form of patches
+that can be applied to Microchip's official source code (available at
+[Microchip's MPLAB-XC website](https://www.microchip.com/mplab/compilers) under
+the *Downloads Archive* tab).
+
+The same code, but in form of already-patched source trees is kept in the
+companion development
+[xc16plusplus-source](https://github.com/fabio-d/xc16plusplus-source/branches/all)
+repository (there is one branch for each supported XC16 version).
 
 ## About XC16 (the official Microchip compiler)
 
 The official XC16 compiler is actually a modified `gcc` version targeting PIC24
 and dsPIC chips. The XC16 distribution also includes other software, but what is
 important for our purposes is that since `gcc` is a GPLv3 project, the XC16
-compiler sources are also covered by the GPLv3.
-They can be downloaded from [the Microchip website](http://www.microchip.com/archived).
-The only officially supported language is C but, given that `gcc` also supports
-C++, it is possible to recompile `gcc` and enable it.
+compiler sources are also covered by the GPLv3. They can be downloaded from
+Microchip's website (see previous section). The only officially supported
+language is C but, given that `gcc` also supports C++, it is possible to
+recompile `gcc` and enable `g++`!
 
 It actually takes a little more effort to obtain a working C++ compiler, and
 this repository hosts some patches I created. The following section shows how to
 apply them to Microchip's XC16 source releases, compile and install the C++
 compiler on top of an existing XC16 installation.
 
-Note that it is not possible to ship a C++ compiler that does not require an
-existing XC16 installation, because all Microchip-supplied header files,
-software libraries, linker scripts and even some pieces of the compiler
+Note that it is not possible to ship a stand-alone C++ compiler that does not
+require an existing XC16 installation, because all Microchip-supplied header
+files, software libraries, linker scripts and even some pieces of the compiler
 infrastructure are proprietary.
 
 ## Installation on top of an existing XC16 installation from binary packages
 
-Coming soon!
+If you download a precompiled XC16++ package, you will find the following files
+in its `bin/bin` subdirectory:
+ * `coff-cc1plus` (Linux and OS X) or `coff-cc1plus.exe` (Windows)
+ * `coff-g++` (Linux and OS X) or `coff-g++.exe` (Windows)
+ * `elf-cc1plus` (Linux and OS X) or `elf-cc1plus.exe` (Windows)
+ * `elf-g++` (Linux and OS X) or `elf-g++.exe` (Windows)
+
+They must be copied to the `bin/bin` directory of the main XC16 installation,
+whose path can vary according to how XC16 was installed. The default path is
+(assuming XC16 version 1.24):
+ * `/opt/microchip/xc16/v1.24/bin/bin` (Linux)
+ * `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin` (Windows)
+ * `/Applications/microchip/xc16/v1.24/bin/bin` (OS X)
+
+If you download a **Linux** or **OS X** package, the `bin` and `bin/bin`
+directories in the package also contain some symbolic links that must be copied
+to the corresponding XC16 installation directory, along with the main
+executables:
+ * `bin/xc16-cc1plus` (symlink to `xc16-cc1`)
+ * `bin/xc16-g++` (symlink to `xc16-gcc`)
+ * `bin/bin/coff-paplus` (symlink to `coff-pa`)
+ * `bin/bin/elf-paplus` (symlink to `elf-pa`)
+
+On **Windows**, you need Administrator rights in order to create symbolic links.
+Therefore, no symbolic links are included in Windows packages. Instead, a
+`bin\create_xc16plusplus_symlinks.cmd` is provided, which can be copied to
+XC16's `bin` directory and run as Administrator to automatically create the
+symbolic links directly on the target system. After creating the links, the
+script will show a confirmation message. You can delete it afterwards.
 
 ## How to build the C++ compiler using `src_build.sh`
 
 `src_build.sh` is the script that comes with the official XC16 source release.
 It has been slightly patched to make it possible to build the C++ compiler
-natively on each supported platform. I also wrote an alternative script, that
-is described in the next section, which is probably easier to use, especially
-under 64-bit Linux.
+natively on each supported platform, as the following instructions show.
+I also wrote an alternative script, that is described in the next section, which
+is probably easier to use, especially under 64-bit Linux.
 
 ### Linux
 
 **Important**: Please note that **I only test 32-bit builds** and my experience
 is that it is not trivial to build XC16 as a 32-bit executable on a 64-bit Linux
-host (for example, even with the `CC='gcc -m32'` option, `libtool` still tries
-to link 64-bit libraries during the build process on Fedora 22). Therefore, if
-you are on a 64-bit Linux OS, usage of a VM or a 32-bit chroot to run the
-compilation process is strongly recommended.
+host using `src_build.sh` (for example, even with the `CC='gcc -m32'` option,
+`libtool` still tries to link 64-bit libraries during the build process on
+Fedora 22). Therefore, if you are on a 64-bit Linux OS, usage of the alternative
+`xc16plusplus_only.sh` script (see next section) is strongly recommended.
 
  1. Install `bison`, `flex`, `libstdc++-static` and `m4` as well as the standard
     set of build tools (incl. `make`, C and C++ compiler).
@@ -62,9 +110,7 @@ compilation process is strongly recommended.
      * `coff-g++` &rarr; `/opt/microchip/xc16/v1.24/bin/bin/coff-g++`
      * `elf-cc1plus` &rarr; `/opt/microchip/xc16/v1.24/bin/bin/elf-cc1plus`
      * `elf-g++` &rarr; `/opt/microchip/xc16/v1.24/bin/bin/elf-g++`
- 6. *(Only if you are using a VM or chroot to build XC16++)* Copy the previous
-    files out of the VM/chroot and go back to your main system.
- 7. Lastly, run the following commands:
+ 6. Lastly, run the following commands:
     <pre>cd /opt/microchip/xc16/v1.24/bin/
     ln -s xc16-cc1 xc16-cc1plus
     ln -s xc16-gcc xc16-g++
@@ -115,13 +161,13 @@ obtain 32-bit executables.
 
 ### OS X
 
-The official XC16 release targets OS X 10.5 and later ones. The 10.5 SDK is
-therefore required if you want to create executables that can be used on every
-system where XC16 itself can be executed. However, if you are only interested in
-being able to run the C++ compiler on your computer, **any SDK will do** (but a
-small manual edit to *build_XC16_451* will be necessary). In both cases, keep in
-mind that **I only test 32 builds**, so make sure you always set *-arch i386*
-(see step 4 for more details).
+The official XC16 release targets OS X 10.5 and later. The 10.5 SDK is therefore
+required if you want to create executables that can be used on every system
+where XC16 itself can be executed. However, if you are only interested in being
+able to run the C++ compiler on your computer, **any SDK will do** (but a small
+manual edit to *build_XC16_451* will be necessary). In both cases, keep in mind
+that **I only test 32 builds**, so make sure you always set *-arch i386* at step
+4.
 
  1. Install the command line tools. As of OS X 10.9 it is as easy as running
     ` xcode-select --install` from the terminal and following the instructions.
@@ -160,8 +206,12 @@ mind that **I only test 32 builds**, so make sure you always set *-arch i386*
 ## How to build the C++ compiler using `xc16plusplus_only.sh`
 
 This is an alternative build script that I wrote to automatically cross-compile
-the C++ compiler under Linux. It has only been tested on Fedora 22, but there is
-no reason why it should not work on other Linux distros.
+the C++ compiler for all supported platforms under Linux. It has only been
+tested on Fedora 22, but there is no reason why it should not work on other
+Linux distros.
+
+I use this script to generate precompiled packages for all platforms (see
+`scripts/make_release.sh`) on 32-bit Fedora 22.
 
 I recommend to use this script instead of `src_build.sh` when building a
 compiler for Linux on 64-bit Linux.
@@ -179,12 +229,14 @@ compiler for Linux on 64-bit Linux.
     version, for example:
     <pre>cd /path/to/v1.24.src/
     patch -p1 < /path/to/xc16plusplus_1_24.patch</pre>
- 4. Run `xc16plusplus_only.sh` and specify the OS you want to cross-compile for:
+ 4. Run `xc16plusplus_only.sh` passing the name of the OS you want to
+    cross-compile for:
      * `./xc16plusplus_only.sh linux` or
      * `./xc16plusplus_only.sh win32` or
      * `./xc16plusplus_only.sh osx`
- 5. Install the resulting files on the target system as if you had used the
-    `src_build.sh` script.
+ 5. Install the resulting files (that can be found in the
+    `install-*gnu-target-name*/bin/bin` subdirectory) on the target system as
+    if you had used the `src_build.sh` script.
 
 ## Limitations
  * There is no libstdc++, therefore all C++ features that rely on external
@@ -242,10 +294,3 @@ compiled by XC16++.
 The example project (*example-project/* subdirectory) and support files
 (*support-files/* subdirectory) are released to public domain, under the terms
 of the "UNLICENSE" (see file *LICENSE-UNLICENSE*).
-
-## Hacking
-
-This repository only contains patches to apply to Microchip's source archives.
-If you want to **modify** the C++ compiler, the
-[xc16plusplus-source](https://github.com/fabio-d/xc16plusplus-source)
-repository is probably more convenient.
