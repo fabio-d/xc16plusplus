@@ -1,0 +1,2 @@
+ptr points to high memory
+1234

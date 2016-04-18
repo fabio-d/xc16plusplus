@@ -1,0 +1,8 @@
+baseclass created
+derivclass created
+baseclass::nonvirtualmethod is running
+derivclass::virtualmethod1 is running
+baseclass::virtualmethod1 is running
+derivclass::virtualmethod2 is running
+derivclass destroyed
+baseclass destroyed

@@ -1,0 +1,4 @@
+x is inside the heap region
+y is inside the heap region
+1 2 3 4
+done!

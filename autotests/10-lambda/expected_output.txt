@@ -1,0 +1,5 @@
+incr by 1
+incr by 2
+incr by 3
+incr by 4
+final value is 10
