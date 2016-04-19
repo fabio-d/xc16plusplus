@@ -1,9 +1,10 @@
 #!/bin/sh
+MAKEARGS=("$@")
 
 function run_make_test()
 {
 	echo "Running $OMF tests on $XC16DIR"
-	make -j
+	make "${MAKEARGS[@]}"
 }
 
 if [ "$(uname)" == "Linux" ];
@@ -12,6 +13,9 @@ then
 elif [ "$(uname)" == "Darwin" ];
 then
 	XC16BASEDIR=/Applications/microchip/xc16
+elif uname | grep -q CYGWIN;
+then
+	XC16BASEDIR="C:\\Program Files (x86)\\Microchip\\xc16"
 else
 	echo "Unsupported OS"
 	exit

@@ -6,8 +6,18 @@
 # The XC16DIR environment variable must be set, e.g.
 #   XC16DIR=/opt/microchip/xc16/v1.23
 
+function to_native_path()
+{
+	if uname | grep -q CYGWIN;
+	then
+		cygpath -w "$1"
+	else
+		echo "$1"
+	fi
+}
+
 THISDIR="$(cd "$(dirname "$0")" && pwd)"
-SUPPORTFILESDIR=$THISDIR/../support-files
+SUPPORTFILESDIR="$(to_native_path "$THISDIR/../support-files")"
 
 if [ "$XC16DIR" == "" ];
 then
@@ -63,8 +73,9 @@ do
 	case "$SRCFILE" in
 		*.c)
 			__verboserun "$XC16DIR/bin/xc16-gcc" "${CFLAGS[@]}" \
-				-c -o "$TEMPDIR/$SRCFILE.o" "$SRCFILE"
-			OBJFILES+=("$TEMPDIR/$SRCFILE.o")
+				-c -o "$(to_native_path "$TEMPDIR/$SRCFILE.o")" \
+					"$(to_native_path "$SRCFILE")"
+			OBJFILES+=("$(to_native_path "$TEMPDIR/$SRCFILE.o")")
 			;;
 		*.cpp)
 			if ! $CXX_SUPPORT_FILES;
@@ -72,37 +83,43 @@ do
 				CXX_SUPPORT_FILES=true
 				__verboserun "$XC16DIR/bin/xc16-g++" \
 					"${CXXFLAGS[@]}" -c -o \
-					"$TEMPDIR/minilibstdc++.o" \
-					"$SUPPORTFILESDIR/minilibstdc++.cpp"
-				OBJFILES+=("$TEMPDIR/minilibstdc++.o")
+					"$(to_native_path "$TEMPDIR/minilibstdc++.o")" \
+					"$(to_native_path "$SUPPORTFILESDIR/minilibstdc++.cpp")"
+				OBJFILES+=("$(to_native_path "$TEMPDIR/minilibstdc++.o")")
 			fi
 			mkdir -p "$(dirname "$TEMPDIR/$SRCFILE.o")"
 			__verboserun "$XC16DIR/bin/xc16-g++" "${CXXFLAGS[@]}" \
-				-c -o "$TEMPDIR/$SRCFILE.o" "$SRCFILE"
-			OBJFILES+=("$TEMPDIR/$SRCFILE.o")
+				-c -o "$(to_native_path "$TEMPDIR/$SRCFILE.o")" \
+					"$(to_native_path "$SRCFILE")"
+			OBJFILES+=("$(to_native_path "$TEMPDIR/$SRCFILE.o")")
 			;;
 	esac
 done
 
-__verboserun "$XC16DIR/bin/xc16-ld" "${LDFLAGS[@]}" -o "$TEMPDIR/result.elf" \
-	"${OBJFILES[@]}" "${LIBS[@]}" --save-gld="$TEMPDIR/gld" >&2
-__verboserun "$XC16DIR/bin/xc16-bin2hex" -omf=$OMF "$TEMPDIR/result.elf"
+__verboserun "$XC16DIR/bin/xc16-ld" "${LDFLAGS[@]}" \
+	-o "$(to_native_path "$TEMPDIR/result.elf")" \
+	"${OBJFILES[@]}" "${LIBS[@]}" \
+	--save-gld="$(to_native_path "$TEMPDIR/gld")" >&2
+__verboserun "$XC16DIR/bin/xc16-bin2hex" -omf=$OMF "$(to_native_path "$TEMPDIR/result.elf")"
 
 cat > "$TEMPDIR/sim30-script" << EOF
 ld $SIM30_DEVICE
-lp $TEMPDIR/result.hex
+lp $(to_native_path "$TEMPDIR/result.hex")
 rp
-io nul $TEMPDIR/output.txt
+io nul $(to_native_path "$TEMPDIR/output.txt")
 e
 q
 EOF
 
 set +e
-__verboserun perl -e 'alarm 10; exec @ARGV' "$XC16DIR/bin/sim30" "$TEMPDIR/sim30-script" >&2
+__verboserun perl -e 'alarm 10; exec @ARGV' "$XC16DIR/bin/sim30" \
+	"$(to_native_path "$TEMPDIR/sim30-script")" >&2
 case "$?" in
 	0)
 		echo "sim30 succeeded!" >&2
-		cat "$TEMPDIR/output.txt"
+		# The apparently useless sed invocation is a trick to normalize
+		# line endings when running on windows/cygwin
+		sed 's/a/a/' "$TEMPDIR/output.txt"
 		;;
 	142)
 		echo "Simulation timed out (killed after 10 seconds)"
