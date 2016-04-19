@@ -10,10 +10,10 @@
 #   TARGET_FAMILY=dsPIC30F
 #   SIM30_DEVICE=dspic30super
 
-cd "$(realpath "$(dirname "$0")")"
+cd "$(cd "$(dirname "$0")" && pwd)"
 
 STDERR=/dev/stderr
-STDOUT=$(mktemp)
+STDOUT=$(mktemp -t run_test.XXXXXXX)
 trap "rm '$STDOUT'" exit
 
 # quiet command line switch: do not propagate compile_and_sim30.sh's stderr

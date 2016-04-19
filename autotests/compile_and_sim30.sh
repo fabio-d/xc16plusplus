@@ -6,7 +6,7 @@
 # The XC16DIR environment variable must be set, e.g.
 #   XC16DIR=/opt/microchip/xc16/v1.23
 
-THISDIR="$(realpath "$(dirname "$0")")"
+THISDIR="$(cd "$(dirname "$0")" && pwd)"
 SUPPORTFILESDIR=$THISDIR/../support-files
 
 if [ "$XC16DIR" == "" ];
@@ -33,10 +33,16 @@ then
 	exit 1
 fi
 
-CFLAGS=(-mno-eds-warn -no-legacy-libc -mcpu="$TARGET_CHIP")
+if [ "$OMF" != "coff" ] && [ "$OMF" != "elf" ];
+then
+	echo "Error: \$OMF is not set or it is neither \"coff\" nor \"elf\"!" >&2
+	exit 1
+fi
+
+CFLAGS=(-omf=$OMF -mno-eds-warn -no-legacy-libc -mcpu="$TARGET_CHIP")
 CXXFLAGS=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=c++0x)
 LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
-LDFLAGS=(--local-stack -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
+LDFLAGS=(-omf=$OMF --local-stack -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
 LIBS=(-lc -lpic30 -lm)
 
 function __verboserun()
@@ -46,7 +52,7 @@ function __verboserun()
 }
 
 set -e
-TEMPDIR=$(mktemp -d)
+TEMPDIR=$(mktemp -d -t compile_and_sim30.XXXXXXX)
 trap "rm -rf '$TEMPDIR'" exit
 
 declare -a OBJFILES
@@ -80,7 +86,7 @@ done
 
 __verboserun "$XC16DIR/bin/xc16-ld" "${LDFLAGS[@]}" -o "$TEMPDIR/result.elf" \
 	"${OBJFILES[@]}" "${LIBS[@]}" --save-gld="$TEMPDIR/gld" >&2
-__verboserun "$XC16DIR/bin/xc16-bin2hex" "$TEMPDIR/result.elf"
+__verboserun "$XC16DIR/bin/xc16-bin2hex" -omf=$OMF "$TEMPDIR/result.elf"
 
 cat > "$TEMPDIR/sim30-script" << EOF
 ld $SIM30_DEVICE
@@ -92,13 +98,13 @@ q
 EOF
 
 set +e
-__verboserun timeout 10s "$XC16DIR/bin/sim30" "$TEMPDIR/sim30-script" >&2
+__verboserun perl -e 'alarm 10; exec @ARGV' "$XC16DIR/bin/sim30" "$TEMPDIR/sim30-script" >&2
 case "$?" in
 	0)
 		echo "sim30 succeeded!" >&2
 		cat "$TEMPDIR/output.txt"
 		;;
-	124)
+	142)
 		echo "Simulation timed out (killed after 10 seconds)"
 		exit 1
 		;;
