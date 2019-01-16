@@ -1,5 +1,5 @@
 diff --git a/build_XC16_451 b/build_XC16_451
-index 891d75b..fa11498 100755
+index 891d75b2f..fa1149812 100755
 --- a/build_XC16_451
 +++ b/build_XC16_451
 @@ -41,7 +41,9 @@ while [ "$DONE" = "0" ]; do
@@ -78,7 +78,7 @@ index 891d75b..fa11498 100755
  
    
 diff --git a/src/XC_GCC/gcc/gcc/Makefile.in b/src/XC_GCC/gcc/gcc/Makefile.in
-index 1b3dca5..495580f 100644
+index 1b3dca599..495580fe8 100644
 --- a/src/XC_GCC/gcc/gcc/Makefile.in
 +++ b/src/XC_GCC/gcc/gcc/Makefile.in
 @@ -1802,7 +1802,7 @@ cpp$(exeext): $(GCC_OBJS) cppspec.o version.o intl.o prefix.o \
@@ -91,7 +91,7 @@ index 1b3dca5..495580f 100644
  
  # We do want to create an executable named `xgcc', so we can use it to
 diff --git a/src/XC_GCC/gcc/gcc/c-common.c b/src/XC_GCC/gcc/gcc/c-common.c
-index 13917af..c5bb17a 100644
+index 13917afa2..c5bb17a9a 100644
 --- a/src/XC_GCC/gcc/gcc/c-common.c
 +++ b/src/XC_GCC/gcc/gcc/c-common.c
 @@ -4774,6 +4774,8 @@ c_common_nodes_and_builtins (void)
@@ -113,7 +113,7 @@ index 13917af..c5bb17a 100644
    builtin_define_with_value ("__WCHAR_TYPE__", MODIFIED_WCHAR_TYPE, 0);
    builtin_define_with_value ("__WINT_TYPE__", WINT_TYPE, 0);
 diff --git a/src/XC_GCC/gcc/gcc/config.gcc b/src/XC_GCC/gcc/gcc/config.gcc
-index 4e21c5d..04ea561 100644
+index 4e21c5d5a..04ea56119 100644
 --- a/src/XC_GCC/gcc/gcc/config.gcc
 +++ b/src/XC_GCC/gcc/gcc/config.gcc
 @@ -2043,8 +2043,9 @@ pic30-*-coff)
@@ -138,8 +138,39 @@ index 4e21c5d..04ea561 100644
          LIBGCCMK=
          ;;
  pic32*-mchp-elf*)
+diff --git a/src/XC_GCC/gcc/gcc/config/pic30/pic30-c.c b/src/XC_GCC/gcc/gcc/config/pic30/pic30-c.c
+index cd242dbc3..0e2d0f185 100644
+--- a/src/XC_GCC/gcc/gcc/config/pic30/pic30-c.c
++++ b/src/XC_GCC/gcc/gcc/config/pic30/pic30-c.c
+@@ -69,6 +69,10 @@
+ #define JOIN2(X,Y) (X ## Y)
+ #define JOIN(X,Y) JOIN2(X,Y)
+ 
++// from version.c
++#define version2(X) #X
++#define version(X) version2(X)
++
+ 
+ static int     pic30_parse_pragma_option(int pc);
+ 
+@@ -113,6 +117,15 @@ void pic30_cpu_cpp_builtins(void *pfile_v) {
+     cpp_define(pfile,"__XC__");
+   }
+ 
++#ifdef XC16PLUSPLUS_VERSION
++  const char *xc16plusplus_version = version(XC16PLUSPLUS_VERSION);
++  if (xc16plusplus_version[0] == 'v')
++  {
++    cpp_define(pfile, "__XC16PLUSPLUS__");
++    sprintf(buffer, "__XC16PLUSPLUS_REVISION__=%s", xc16plusplus_version + 1);
++    cpp_define(pfile, buffer);
++  }
++#endif
+ 
+   if ((cpp_get_options (pfile)->lang != CLK_ASM)) {
+     cpp_define(pfile,"__XC16");
 diff --git a/src/XC_GCC/gcc/gcc/cp/cfns.h b/src/XC_GCC/gcc/gcc/cp/cfns.h
-index 62cdfab..4f63cc4 100644
+index 62cdfab93..4f63cc48e 100644
 --- a/src/XC_GCC/gcc/gcc/cp/cfns.h
 +++ b/src/XC_GCC/gcc/gcc/cp/cfns.h
 @@ -53,6 +53,9 @@ __inline
@@ -162,7 +193,7 @@ index 62cdfab..4f63cc4 100644
    switch (hval)
      {
 diff --git a/src/XC_GCC/gcc/gcc/cp/decl.c b/src/XC_GCC/gcc/gcc/cp/decl.c
-index c65a5a0..3beced2 100644
+index c65a5a063..3beced2eb 100644
 --- a/src/XC_GCC/gcc/gcc/cp/decl.c
 +++ b/src/XC_GCC/gcc/gcc/cp/decl.c
 @@ -13009,4 +13009,14 @@ cxx_comdat_group (tree decl)
@@ -181,7 +212,7 @@ index c65a5a0..3beced2 100644
 +
  #include "gt-cp-decl.h"
 diff --git a/src/XC_GCC/gcc/gcc/cp/mangle.c b/src/XC_GCC/gcc/gcc/cp/mangle.c
-index e1527fe..c383d0c 100644
+index e1527fe06..c383d0c1c 100644
 --- a/src/XC_GCC/gcc/gcc/cp/mangle.c
 +++ b/src/XC_GCC/gcc/gcc/cp/mangle.c
 @@ -60,6 +60,14 @@ along with GCC; see the file COPYING3.  If not see
@@ -274,7 +305,7 @@ index e1527fe..c383d0c 100644
    return finish_mangling_get_identifier (/*warn=*/false);
  }
 diff --git a/src/XC_GCC/gcc/gcc/cp/method.c b/src/XC_GCC/gcc/gcc/cp/method.c
-index 5ed98bc..2ce5544 100644
+index 5ed98bc93..2ce5544ab 100644
 --- a/src/XC_GCC/gcc/gcc/cp/method.c
 +++ b/src/XC_GCC/gcc/gcc/cp/method.c
 @@ -312,7 +312,7 @@ use_thunk (tree thunk_fndecl, bool emit_p)
@@ -287,7 +318,7 @@ index 5ed98bc..2ce5544 100644
    else
     alias = function;
 diff --git a/src/XC_GCC/gcc/gcc/cppdefault.c b/src/XC_GCC/gcc/gcc/cppdefault.c
-index 5024f48..853ac39 100644
+index 5024f48c9..853ac3909 100644
 --- a/src/XC_GCC/gcc/gcc/cppdefault.c
 +++ b/src/XC_GCC/gcc/gcc/cppdefault.c
 @@ -41,6 +41,19 @@
@@ -311,7 +342,7 @@ index 5024f48..853ac39 100644
  #ifdef INCLUDE_DEFAULTS
  = INCLUDE_DEFAULTS;
 diff --git a/src/XC_GCC/gcc/gcc/varasm.c b/src/XC_GCC/gcc/gcc/varasm.c
-index bd4b23b..6d8bfea 100644
+index bd4b23b6f..6d8bfea66 100644
 --- a/src/XC_GCC/gcc/gcc/varasm.c
 +++ b/src/XC_GCC/gcc/gcc/varasm.c
 @@ -1647,7 +1647,8 @@ default_stabs_asm_out_destructor (rtx symbol ATTRIBUTE_UNUSED,
@@ -337,7 +368,7 @@ index bd4b23b..6d8bfea 100644
  }
  
 diff --git a/src/XC_GCC/gcc/gcc/version.c b/src/XC_GCC/gcc/gcc/version.c
-index 3325a58..6931229 100644
+index 3325a58e7..693122939 100644
 --- a/src/XC_GCC/gcc/gcc/version.c
 +++ b/src/XC_GCC/gcc/gcc/version.c
 @@ -45,7 +45,7 @@ const char version_string[] = BASEVER " " "MPLAB XC32 Compiler v1.11"; /* XC32 *
@@ -350,7 +381,7 @@ index 3325a58..6931229 100644
  
  const char version_string[] = BASEVER " " "MPLAB XC Compiler v1.10";
 diff --git a/src/XC_GCC/ppl/src/Congruence_System.defs.hh b/src/XC_GCC/ppl/src/Congruence_System.defs.hh
-index 0a9e186..96bb05a 100644
+index 0a9e186ac..96bb05a17 100644
 --- a/src/XC_GCC/ppl/src/Congruence_System.defs.hh
 +++ b/src/XC_GCC/ppl/src/Congruence_System.defs.hh
 @@ -31,6 +31,7 @@ site: http://www.cs.unipr.it/ppl/ . */
@@ -371,7 +402,7 @@ index 0a9e186..96bb05a 100644
  			   const Congruence&> {
    public:
 diff --git a/src/XC_GCC/ppl/src/Constraint_System.defs.hh b/src/XC_GCC/ppl/src/Constraint_System.defs.hh
-index c35c5e1..f06a07e 100644
+index c35c5e1a7..f06a07e1c 100644
 --- a/src/XC_GCC/ppl/src/Constraint_System.defs.hh
 +++ b/src/XC_GCC/ppl/src/Constraint_System.defs.hh
 @@ -32,6 +32,7 @@ site: http://www.cs.unipr.it/ppl/ . */
@@ -392,7 +423,7 @@ index c35c5e1..f06a07e 100644
  			   const Constraint&> {
    public:
 diff --git a/src/XC_GCC/ppl/src/Generator_System.defs.hh b/src/XC_GCC/ppl/src/Generator_System.defs.hh
-index f9e7903..6d75e4b 100644
+index f9e790388..6d75e4b56 100644
 --- a/src/XC_GCC/ppl/src/Generator_System.defs.hh
 +++ b/src/XC_GCC/ppl/src/Generator_System.defs.hh
 @@ -33,6 +33,7 @@ site: http://www.cs.unipr.it/ppl/ . */
@@ -413,7 +444,7 @@ index f9e7903..6d75e4b 100644
  			   const Generator&> {
    public:
 diff --git a/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh b/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
-index 2fa3770..0a80606 100644
+index 2fa377021..0a806066f 100644
 --- a/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
 +++ b/src/XC_GCC/ppl/src/Grid_Generator_System.defs.hh
 @@ -28,6 +28,7 @@ site: http://www.cs.unipr.it/ppl/ . */
@@ -434,7 +465,7 @@ index 2fa3770..0a80606 100644
  			   const Grid_Generator&>,
        private Generator_System::const_iterator {
 diff --git a/src/XC_GCC/ppl/src/ppl.hh.dist b/src/XC_GCC/ppl/src/ppl.hh.dist
-index 6226c45..81db1c4 100644
+index 6226c4512..81db1c42b 100644
 --- a/src/XC_GCC/ppl/src/ppl.hh.dist
 +++ b/src/XC_GCC/ppl/src/ppl.hh.dist
 @@ -692,6 +692,7 @@ class stdiobuf;
@@ -482,7 +513,7 @@ index 6226c45..81db1c4 100644
  			   const Grid_Generator&>,
        private Generator_System::const_iterator {
 diff --git a/src/acme/binutils/bucomm.h b/src/acme/binutils/bucomm.h
-index 2598d13..0134763 100755
+index 2598d1338..01347635d 100755
 --- a/src/acme/binutils/bucomm.h
 +++ b/src/acme/binutils/bucomm.h
 @@ -23,6 +23,7 @@
@@ -494,14 +525,14 @@ index 2598d13..0134763 100755
  
  #include "config.h"
 diff --git a/src_build.sh b/src_build.sh
-index 2740d06..7204780 100755
+index 2740d0632..c09557f11 100755
 --- a/src_build.sh
 +++ b/src_build.sh
 @@ -4,8 +4,11 @@ THIS_DIR=`pwd`
  
  OS=`uname -s`
  
-+XC16PLUSPLUS_VERSION=v1
++XC16PLUSPLUS_VERSION=v2
 +
  export OS
  export CC
@@ -552,12 +583,12 @@ index 2740d06..7204780 100755
  
 diff --git a/xc16plusplus_only.sh b/xc16plusplus_only.sh
 new file mode 100755
-index 0000000..cf547bc
+index 000000000..ee84da743
 --- /dev/null
 +++ b/xc16plusplus_only.sh
 @@ -0,0 +1,117 @@
-+#!/bin/sh
-+THISDIR="$(realpath "$(dirname "$_")")"
++#!/bin/bash
++THISDIR="$(realpath "$(dirname "$0")")"
 +SRCDIR="$THISDIR/src"
 +BUILD=$("$SRCDIR/XC_GCC/gcc/config.guess")
 +
