@@ -7,3 +7,9 @@ ptr points to high memory
 *(__eds__ int*)ptr = 1234
 *static_cast<__eds__ int*>(ptr) = 1234
 read_eds(ptr) = 1234
+sizeof(pointer_to_psv_int) = 4
+sizeof(&pointer_to_psv_int) = 2
+sizeof(*pointer_to_psv_int) = 2
+sizeof(psv_pointer_to_int) = 2
+sizeof(&psv_pointer_to_int) = 4
+sizeof(*psv_pointer_to_int) = 2

@@ -5,6 +5,16 @@
 #define COUNT_16KB_OF_INTS (32l * 1024 / 4)
 __eds__ int var_in_eds[COUNT_16KB_OF_INTS] __attribute__((eds));
 
+// example from the manual
+__psv__ int *pointer_to_psv_int;
+
+#if 0 // this syntax does not compile in xc16++
+int * __psv__ psv_pointer_to_int __attribute__((space(psv)));
+#else // equivalent, but accepted by xc16++
+typedef int *intstar;
+intstar __psv__ psv_pointer_to_int __attribute__((space(psv)));
+#endif
+
 typedef __eds__ int *eds_ptr_t;
 
 // return pointer to last element
@@ -48,6 +58,14 @@ int main (int argc, char *argv[])
 	printf("*(__eds__ int*)ptr = %d\n", *(__eds__ int*)ptr);
 	printf("*static_cast<__eds__ int*>(ptr) = %d\n", *static_cast<__eds__ int*>(ptr));
 	printf("read_eds(ptr) = %d\n", read_eds(ptr));
+
+	printf("sizeof(pointer_to_psv_int) = %u\n", (unsigned int)sizeof(pointer_to_psv_int));
+	printf("sizeof(&pointer_to_psv_int) = %u\n", (unsigned int)sizeof(&pointer_to_psv_int));
+	printf("sizeof(*pointer_to_psv_int) = %u\n", (unsigned int)sizeof(*pointer_to_psv_int));
+
+	printf("sizeof(psv_pointer_to_int) = %u\n", (unsigned int)sizeof(psv_pointer_to_int));
+	printf("sizeof(&psv_pointer_to_int) = %u\n", (unsigned int)sizeof(&psv_pointer_to_int));
+	printf("sizeof(*psv_pointer_to_int) = %u\n", (unsigned int)sizeof(*psv_pointer_to_int));
 
 	return 0;
 }
