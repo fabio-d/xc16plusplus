@@ -49,5 +49,7 @@ then
 	exit 0
 else
 	echo "Test $1 failed" >&2
+	# Print command to re-run the test and debug the issue
+	echo "XC16DIR=$XC16DIR" "OMF=$OMF" $0 $1 >&2
 	exit 1
 fi

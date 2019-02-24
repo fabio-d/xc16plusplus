@@ -1,8 +1,8 @@
 diff --git a/build_XC16_451 b/build_XC16_451
-index 891d75b2f..fa1149812 100755
+index 9ac5d3722..e7de4c972 100755
 --- a/build_XC16_451
 +++ b/build_XC16_451
-@@ -41,7 +41,9 @@ while [ "$DONE" = "0" ]; do
+@@ -42,7 +42,9 @@ while [ "$DONE" = "0" ]; do
    else
      case $1 in
        -user)
@@ -13,7 +13,7 @@ index 891d75b2f..fa1149812 100755
           EXTRA_DEFINES="-DRESOURCE_MISMATCH_OK"
           shift 1;;
        -install=*) 
-@@ -164,8 +166,22 @@ fi
+@@ -165,8 +167,22 @@ fi
  if [ "$BUILD_OS" != "i386-darwin" ]; then
    BUILD="$BUILD ppl"
    STATIC="-Wl,-Bstatic,-lstdc++,-Bdynamic,-lm"
@@ -36,7 +36,7 @@ index 891d75b2f..fa1149812 100755
  if ( echo $EXTRA_CFLAGS | grep -q -e "cover" ); then
    OPT=
  else
-@@ -184,8 +200,12 @@ echo
+@@ -185,8 +201,12 @@ echo
  mkdir -p gmp
  ( cd gmp
  
@@ -50,7 +50,7 @@ index 891d75b2f..fa1149812 100755
  
    make -j 2 install
  )
-@@ -202,7 +222,7 @@ mkdir -p ppl
+@@ -203,7 +223,7 @@ mkdir -p ppl
    export CFLAGS=-m32
    export CXXFLAGS=-m32
  
@@ -59,7 +59,7 @@ index 891d75b2f..fa1149812 100755
  
    make -j 2 install
  )
-@@ -293,11 +313,15 @@ mkdir -p gcc
+@@ -306,11 +326,15 @@ mkdir -p gcc
      DWARF="--with-dwarf2"
    fi
  
@@ -68,7 +68,7 @@ index 891d75b2f..fa1149812 100755
 +  fi
 +
    echo "{"
--  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
+-  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --enable-coverage --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
 +  echo "  CXXFLAGS=\"$EXTRA_CFLAGS $OPT\" GCC_FOR_TARGET='pic30-gcc' CC_FOR_TARGET='pic30-gcc' AS_FOR_TARGET=$PIC30_CD/bin/pic30-as LD_FOR_TARGET=$PIC30_CD/bin/pic30-ld CFLAGS=\"$EXTRA_CFLAGS $OPT -D_BUILD_C30_ -D_BUILD_MCHP_ ${EXTRA_OPTS} ${EXTRA_DEFINES}\" $SRC_DIR/gcc/configure --build=${BUILD_OS} ${CROSS} --target=pic30-$OMF $LTO --disable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --disable-hosted-libstdcxx --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --disable-nls --disable-libgomp --without-headers --disable-libffi --disable-bootstrap --prefix=${INSTALL}/bin --libexecdir=${INSTALL}/bin --program-prefix=pic30- --with-libelf=${WORKING_DIR}/host-libs/ $DWARF --with-gmp=$WORKING_DIR/host-libs --with-ppl=$WORKING_DIR/host-libs --with-cloog=$WORKING_DIR/host-libs --with-zlib=$WORKING_DIR/host-libs --with-bugurl=\"${BUGURL}\" --with-host-libstdcxx=\"$STATIC\" "
    echo "}"
  
@@ -430,10 +430,10 @@ index 5024f48c9..853ac3909 100644
  #ifdef INCLUDE_DEFAULTS
  = INCLUDE_DEFAULTS;
 diff --git a/src/XC_GCC/gcc/gcc/varasm.c b/src/XC_GCC/gcc/gcc/varasm.c
-index bd4b23b6f..6d8bfea66 100644
+index 41dfedd81..ab9fd03d0 100644
 --- a/src/XC_GCC/gcc/gcc/varasm.c
 +++ b/src/XC_GCC/gcc/gcc/varasm.c
-@@ -1647,7 +1647,8 @@ default_stabs_asm_out_destructor (rtx symbol ATTRIBUTE_UNUSED,
+@@ -1657,7 +1657,8 @@ default_stabs_asm_out_destructor (rtx symbol ATTRIBUTE_UNUSED,
    dbxout_begin_simple_stabs ("___DTOR_LIST__", 22 /* N_SETT */);
    dbxout_stab_value_label (XSTR (symbol, 0));
  #else
@@ -443,7 +443,7 @@ index bd4b23b6f..6d8bfea66 100644
  #endif
  }
  
-@@ -1723,7 +1724,10 @@ default_stabs_asm_out_constructor (rtx symbol ATTRIBUTE_UNUSED,
+@@ -1733,7 +1734,10 @@ default_stabs_asm_out_constructor (rtx symbol ATTRIBUTE_UNUSED,
    dbxout_begin_simple_stabs ("___CTOR_LIST__", 22 /* N_SETT */);
    dbxout_stab_value_label (XSTR (symbol, 0));
  #else
@@ -613,7 +613,7 @@ index 2598d1338..01347635d 100755
  
  #include "config.h"
 diff --git a/src_build.sh b/src_build.sh
-index 2740d0632..c09557f11 100755
+index 2740d0632..e05e542d0 100755
 --- a/src_build.sh
 +++ b/src_build.sh
 @@ -4,8 +4,11 @@ THIS_DIR=`pwd`
@@ -660,7 +660,7 @@ index 2740d0632..c09557f11 100755
         cd gcc-${OMF}-native
         export EXTRA_CFLAGS
 -       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=i686-pc-mingw32-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v0_00
-+       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=$HOST-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v1.24 -DXC16PLUSPLUS_VERSION=$XC16PLUSPLUS_VERSION
++       $THIS_DIR/build_XC16_451 -user -src=$SRC -omf=$OMF -cross=$HOST-nolm  -D_FORTIFY_SOURCE=0 -DMCHP_VERSION=v1.26 -DXC16PLUSPLUS_VERSION=$XC16PLUSPLUS_VERSION
         cp gcc/gcc/xgcc${EXE} ${install_dir}/bin/bin/${OMF}-gcc${EXE}
         cp gcc/gcc/cc1${EXE} ${install_dir}/bin/bin/${OMF}-cc1${EXE}
         cp gcc/gcc/cpp${EXE} ${install_dir}/bin/bin/${OMF}-cpp${EXE}

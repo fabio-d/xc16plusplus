@@ -32,3 +32,7 @@ OMF=elf run_make_test
 export XC16DIR="$XC16BASEDIR/v1.25"
 OMF=coff run_make_test
 OMF=elf run_make_test
+
+export XC16DIR="$XC16BASEDIR/v1.26"
+OMF=coff run_make_test
+OMF=elf run_make_test

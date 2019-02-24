@@ -11,9 +11,9 @@ TARGET_FAMILY := dsPIC33F
 #your own values
 
 # Change this to match your XC16 and XC16++ version and path
-XC16DIR := /opt/microchip/xc16/v1.25
-#XC16DIR := "C:\Program Files (x86)\Microchip\xc16\v1.25"
-#XC16DIR := /Applications/microchip/xc16/v1.25
+XC16DIR := /opt/microchip/xc16/v1.26
+#XC16DIR := "C:\Program Files (x86)\Microchip\xc16\v1.26"
+#XC16DIR := /Applications/microchip/xc16/v1.26
 SUPPORTFILESDIR := ../support-files
 
 # Example options for the C compiler

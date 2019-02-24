@@ -1,0 +1,9 @@
+sizeof(int*) = 2
+sizeof(__eds__ int*) = 4
+sizeof(eds_ptr_t) = 4
+sizeof(ptr) = 4
+ptr points to high memory
+*ptr2 = 1234
+*(__eds__ int*)ptr = 1234
+*static_cast<__eds__ int*>(ptr) = 1234
+read_eds(ptr) = 1234

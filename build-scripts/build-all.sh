@@ -9,3 +9,4 @@ set -ex
 ./build-targets.sh v1.23 linux win32 osx
 ./build-targets.sh v1.24 linux win32 osx
 ./build-targets.sh v1.25 linux win32 osx
+./build-targets.sh v1.26 linux win32 osx

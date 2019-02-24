@@ -9,6 +9,8 @@ MCHPTARBALLS["v1.24"]='xc16-v1.24-src.zip'
 TOPLEVELDIRS["v1.24"]='v1.24.src'
 MCHPTARBALLS["v1.25"]='v1.25.src.zip'
 TOPLEVELDIRS["v1.25"]='v1.25.src'
+MCHPTARBALLS["v1.26"]='MPLAB XC16 v1.26.src.zip'
+TOPLEVELDIRS["v1.26"]='v1.26.src'
 
 XC16_VERSION=$1
 shift

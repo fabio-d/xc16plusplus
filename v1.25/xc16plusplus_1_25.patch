@@ -112,6 +112,19 @@ index 13917afa2..c5bb17a9a 100644
    builtin_define_with_value ("__PTRDIFF_TYPE__", PTRDIFF_TYPE, 0);
    builtin_define_with_value ("__WCHAR_TYPE__", MODIFIED_WCHAR_TYPE, 0);
    builtin_define_with_value ("__WINT_TYPE__", WINT_TYPE, 0);
+diff --git a/src/XC_GCC/gcc/gcc/c-common.h b/src/XC_GCC/gcc/gcc/c-common.h
+index 8eebab108..4facb1dd8 100644
+--- a/src/XC_GCC/gcc/gcc/c-common.h
++++ b/src/XC_GCC/gcc/gcc/c-common.h
+@@ -289,7 +289,7 @@ struct c_common_resword
+ 
+ /* Macro for backends to define named address keywords.  */
+ #define ADDR_SPACE_KEYWORD(STRING, VALUE) \
+-  { STRING, RID_FIRST_ADDR_SPACE + (VALUE), D_CONLY | D_EXT }
++  { STRING, RID_FIRST_ADDR_SPACE + (VALUE), D_EXT }
+ 
+ /* The reserved keyword table.  */
+ extern const struct c_common_resword c_common_reswords[];
 diff --git a/src/XC_GCC/gcc/gcc/config.gcc b/src/XC_GCC/gcc/gcc/config.gcc
 index 4e21c5d5a..04ea56119 100644
 --- a/src/XC_GCC/gcc/gcc/config.gcc
@@ -192,11 +205,35 @@ index 62cdfab93..4f63cc48e 100644
  
    switch (hval)
      {
+diff --git a/src/XC_GCC/gcc/gcc/cp/cp-tree.h b/src/XC_GCC/gcc/gcc/cp/cp-tree.h
+index a6964ad33..2b2858903 100644
+--- a/src/XC_GCC/gcc/gcc/cp/cp-tree.h
++++ b/src/XC_GCC/gcc/gcc/cp/cp-tree.h
+@@ -4388,6 +4388,8 @@ typedef struct cp_decl_specifier_seq {
+   BOOL_BITFIELD explicit_int_p : 1;
+   /* True iff "char" was explicitly provided.  */
+   BOOL_BITFIELD explicit_char_p : 1;
++  /* The address space that the declaration belongs to.  */
++  addr_space_t address_space;
+ } cp_decl_specifier_seq;
+ 
+ /* The various kinds of declarators.  */
 diff --git a/src/XC_GCC/gcc/gcc/cp/decl.c b/src/XC_GCC/gcc/gcc/cp/decl.c
-index c65a5a063..3beced2eb 100644
+index c65a5a063..e4a9b4065 100644
 --- a/src/XC_GCC/gcc/gcc/cp/decl.c
 +++ b/src/XC_GCC/gcc/gcc/cp/decl.c
-@@ -13009,4 +13009,14 @@ cxx_comdat_group (tree decl)
+@@ -8161,6 +8161,10 @@ grokdeclarator (const cp_declarator *declarator,
+     }
+ 
+   type_quals = TYPE_UNQUALIFIED;
++
++  /* Set target address space.  */
++  type_quals |= ENCODE_QUAL_ADDR_SPACE (declspecs->address_space);
++
+   if (declspecs->specs[(int)ds_const])
+     type_quals |= TYPE_QUAL_CONST;
+   /* A `constexpr' specifier used in an object declaration declares
+@@ -13009,4 +13013,14 @@ cxx_comdat_group (tree decl)
    return name;
  }
  
@@ -317,6 +354,57 @@ index 5ed98bc93..2ce5544ab 100644
     alias = make_alias_for_thunk (function);
    else
     alias = function;
+diff --git a/src/XC_GCC/gcc/gcc/cp/parser.c b/src/XC_GCC/gcc/gcc/cp/parser.c
+index 0b5340053..1e6c557e8 100644
+--- a/src/XC_GCC/gcc/gcc/cp/parser.c
++++ b/src/XC_GCC/gcc/gcc/cp/parser.c
+@@ -9098,6 +9098,13 @@ cp_parser_decl_specifier_seq (cp_parser* parser,
+ 		       cp_parser_attributes_opt (parser));
+ 	  continue;
+ 	}
++      else if (token->keyword >= RID_FIRST_ADDR_SPACE
++	      && token->keyword <= RID_LAST_ADDR_SPACE)
++	{
++	  decl_specs->address_space = token->keyword - RID_FIRST_ADDR_SPACE;
++	  cp_lexer_consume_token (parser->lexer);
++	  continue;
++	}
+       /* Assume we will find a decl-specifier keyword.  */
+       found_decl_spec = true;
+       /* If the next token is an appropriate keyword, we can simply
+@@ -14714,9 +14721,13 @@ cp_parser_type_specifier_seq (cp_parser* parser,
+     {
+       tree type_specifier;
+       bool is_cv_qualifier;
++      cp_token *token;
++
++      /* Peek at the next token.  */
++      token = cp_lexer_peek_token (parser->lexer);
+ 
+       /* Check for attributes first.  */
+-      if (cp_lexer_next_token_is_keyword (parser->lexer, RID_ATTRIBUTE))
++      if (token->keyword == RID_ATTRIBUTE)
+ 	{
+ 	  type_specifier_seq->attributes =
+ 	    chainon (type_specifier_seq->attributes,
+@@ -14727,7 +14738,16 @@ cp_parser_type_specifier_seq (cp_parser* parser,
+       /* record the token of the beginning of the type specifier seq,
+          for error reporting purposes*/
+      if (!start_token)
+-       start_token = cp_lexer_peek_token (parser->lexer);
++       start_token = token;
++
++      if (token->keyword >= RID_FIRST_ADDR_SPACE
++	    && token->keyword <= RID_LAST_ADDR_SPACE)
++      {
++	type_specifier_seq->address_space =
++	  token->keyword - RID_FIRST_ADDR_SPACE;
++	cp_lexer_consume_token (parser->lexer);
++	continue;
++      }
+ 
+       /* Look for the type-specifier.  */
+       type_specifier = cp_parser_type_specifier (parser,
 diff --git a/src/XC_GCC/gcc/gcc/cppdefault.c b/src/XC_GCC/gcc/gcc/cppdefault.c
 index 5024f48c9..853ac3909 100644
 --- a/src/XC_GCC/gcc/gcc/cppdefault.c

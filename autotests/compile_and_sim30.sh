@@ -50,7 +50,7 @@ then
 fi
 
 CFLAGS=(-omf=$OMF -mno-eds-warn -no-legacy-libc -mcpu="$TARGET_CHIP")
-CXXFLAGS=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=c++0x)
+CXXFLAGS=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
 LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
 LDFLAGS=(-omf=$OMF --local-stack -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
 LIBS=(-lc -lpic30 -lm)
