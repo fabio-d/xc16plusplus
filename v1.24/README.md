@@ -2,6 +2,8 @@
 
 There should be no user-visible differences from the previous version.
 
+This XC16 version is supported by XC16++ since v1.
+
 ## Installation
 
 Install XC16 first, then follow instructions in the [README file](../README.md)

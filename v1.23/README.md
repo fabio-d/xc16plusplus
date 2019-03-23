@@ -1,6 +1,7 @@
 # XC16++ for XC16 v1.23
 
-This is the first XC16 version supported by XC16++.
+This used to be the lowest XC16 version supported by XC16++ v1. This is no
+longer the case with XC16 v2.
 
 ## Installation
 

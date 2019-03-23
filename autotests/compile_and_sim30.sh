@@ -3,8 +3,9 @@
 #   Usage: ./compile_and_sim30.sh <source-files...>
 # If at least one C++ file is present, C++ support files are automatically
 # linked in too.
-# The XC16DIR environment variable must be set, e.g.
+# The XC16DIR and XC16VER environment variables must be set, e.g.
 #   XC16DIR=/opt/microchip/xc16/v1.23
+#   XC16VER=v1.23
 
 function to_native_path()
 {
@@ -16,12 +17,35 @@ function to_native_path()
 	fi
 }
 
+# Tests whether the current XC16 version is equal or newer than the specified one
+# e.g. XC16VER=v1.23 xc16ver_ge v1.22 -> true
+function xc16ver_ge()
+{
+	CURRENT_MAJOR=$(echo "$XC16VER" | cut -d. -f1 | tr -d v)
+	CURRENT_MINOR=$(echo "$XC16VER" | cut -d. -f2)
+	TEST_MAJOR=$(echo "$1" | cut -d. -f1 | tr -d v)
+	TEST_MINOR=$(echo "$1" | cut -d. -f2)
+
+	if [ $CURRENT_MAJOR -eq $TEST_MAJOR ];
+	then
+		[ $CURRENT_MINOR -ge $TEST_MINOR ]
+	else
+		[ $CURRENT_MAJOR -ge $TEST_MAJOR ]
+	fi
+}
+
 THISDIR="$(cd "$(dirname "$0")" && pwd)"
 SUPPORTFILESDIR="$(to_native_path "$THISDIR/../support-files")"
 
 if [ "$XC16DIR" == "" ];
 then
 	echo "Error: \$XC16DIR is not set!" >&2
+	exit 1
+fi
+
+if [ "$XC16VER" == "" ];
+then
+	echo "Error: \$XC16VER is not set!" >&2
 	exit 1
 fi
 
@@ -49,11 +73,22 @@ then
 	exit 1
 fi
 
-CFLAGS=(-omf=$OMF -mno-eds-warn -no-legacy-libc -mcpu="$TARGET_CHIP")
+CFLAGS=(-omf=$OMF -mcpu="$TARGET_CHIP")
 CXXFLAGS=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
 LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
-LDFLAGS=(-omf=$OMF --local-stack -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
+LDFLAGS=(-omf=$OMF -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
 LIBS=(-lc -lpic30 -lm)
+
+if xc16ver_ge v1.20;
+then
+	CFLAGS+=(-mno-eds-warn)
+	LDFLAGS+=(--local-stack)
+fi
+
+if xc16ver_ge v1.25;
+then
+	CFLAGS+=(-no-legacy-libc)
+fi
 
 function __verboserun()
 {
@@ -117,9 +152,9 @@ __verboserun perl -e 'alarm 10; exec @ARGV' "$XC16DIR/bin/sim30" \
 case "$?" in
 	0)
 		echo "sim30 succeeded!" >&2
-		# The apparently useless sed invocation is a trick to normalize
-		# line endings when running on windows/cygwin
-		sed 's/a/a/' "$TEMPDIR/output.txt"
+
+		# Normalize line endings when running on windows
+		sed 's/\r\r$/\r/' "$TEMPDIR/output.txt"
 		;;
 	142)
 		echo "Simulation timed out (killed after 10 seconds)"

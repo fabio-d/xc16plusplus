@@ -5,6 +5,8 @@ are no longer compatible with options `-std=c++98`  and `-std=c++0x`. If your
 project uses one of those, replace it respectively with `-std=gnu++98` or
 `-std=gnu++0x`.
 
+This XC16 version is supported by XC16++ since v2.
+
 ## Installation
 
 Install XC16 first, then follow instructions in the [README file](../README.md)

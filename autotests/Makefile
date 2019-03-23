@@ -5,8 +5,7 @@ QUIET=-q
 .PHONY: test
 
 %.test:
-	./run_test.sh $(QUIET) $*
+	"$(shell pwd)/run_test.sh" $(QUIET) $*
 
 # "make test" runs all tests except those that are known to be broken
 test: $(filter-out %.knownbroken.test,$(TESTS))
-	@echo All tests passed

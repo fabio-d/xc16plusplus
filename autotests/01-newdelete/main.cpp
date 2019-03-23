@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+extern "C" void *_heap, *_eheap;
+
 int main (int argc, char *argv[])
 {
 	int *x = new int;
@@ -10,8 +12,13 @@ int main (int argc, char *argv[])
 	y[1] = 3;
 	y[2] = 4;
 
+#if __XC16_VERSION < 1011
+	const unsigned long heap_start = (unsigned long)&_heap;
+	const unsigned long heap_end = (unsigned long)&_eheap;
+#else // __builtin_section_begin/end are only available since v1.11
 	const unsigned long heap_start = __builtin_section_begin(".heap");
 	const unsigned long heap_end = __builtin_section_end(".heap");
+#endif
 	const unsigned long x_addr = (unsigned long)x;
 	const unsigned long y_addr = (unsigned long)y;
 

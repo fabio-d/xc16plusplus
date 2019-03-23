@@ -5,6 +5,8 @@ C30 C library by default (i.e. option ```-legacy-libc``` was made the default
 option). It is not compatible with the C++ compiler, so be sure you compile your
 firmware with the ```-no-legacy-libc``` compiler option.
 
+This XC16 version is supported by XC16++ since v1.
+
 ## Installation
 
 Install XC16 first, then follow instructions in the [README file](../README.md)
