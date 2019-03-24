@@ -1,7 +1,7 @@
 FROM fedora:22
 
 # Install prerequisites
-RUN dnf install -y bison bzip2 clang file findutils flex gcc-c++ libmpc-devel libstdc++-static libuuid-devel libxml2-devel llvm-devel make m4 openssl-devel patch perl tar wget which xz
+RUN dnf install -y bison bzip2 clang file findutils flex gcc-c++ gettext libmpc-devel libstdc++-static libuuid-devel libxml2-devel llvm-devel make m4 openssl-devel patch perl tar wget which xz
 
 # Download osxcross source code into /opt/osxcross
 RUN mkdir -p /opt/osxcross

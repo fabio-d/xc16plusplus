@@ -1,16 +1,20 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
-declare -A MCHPTARBALLS
-declare -A TOPLEVELDIRS
-MCHPTARBALLS["v1.23"]='xc16-v1.23-src.zip'
-TOPLEVELDIRS["v1.23"]='v1.23_src_archive'
-MCHPTARBALLS["v1.24"]='xc16-v1.24-src.zip'
-TOPLEVELDIRS["v1.24"]='v1.24.src'
-MCHPTARBALLS["v1.25"]='v1.25.src.zip'
-TOPLEVELDIRS["v1.25"]='v1.25.src'
-MCHPTARBALLS["v1.26"]='MPLAB XC16 v1.26.src.zip'
-TOPLEVELDIRS["v1.26"]='v1.26.src'
+if [ "$#" -le 1 ];
+then
+	echo "Usage: $0 vN.NN target1 [target2 [target3]]"
+	echo "targetN can be linux, win32 or osx"
+	exit 1
+fi
+
+# Path to the "xc16plusplus-source" repository.
+# This can also be overridden and set to a local path. For example:
+#  export XC16PLUSPLUS_SOURCE_REPO=/path/to/xc16plusplus-source
+if [ -z "$XC16PLUSPLUS_SOURCE_REPO" ];
+then
+	export XC16PLUSPLUS_SOURCE_REPO="git@github.com:fabio-d/xc16plusplus-source"
+fi
 
 XC16_VERSION=$1
 shift
@@ -21,15 +25,12 @@ set -ex
 mkdir "build-$XC16_VERSION"
 cd "build-$XC16_VERSION"
 
-# Extract source code
-unzip "../tarballs/${MCHPTARBALLS[$XC16_VERSION]}"
-cd "${TOPLEVELDIRS[$XC16_VERSION]}"
-
-# Apply xc16++ patches
-cat "../../../$XC16_VERSION"/*.patch | patch -p1
+# Download source code
+git clone "$XC16PLUSPLUS_SOURCE_REPO" src --depth 1 -b "xc16++-$XC16_VERSION"
+cd src
 
 # Read xc16++ version
-XC16PLUSPLUS_VERSION=$(sed -n 's/.*XC16PLUSPLUS_VERSION=\(v[^ ]*\).*/\1/p' src_build.sh)
+XC16PLUSPLUS_VERSION=$(sed -n 's/.*XC16PLUSPLUS_VERSION=\(v[^ ]*\).*/\1/p' build_xc16plusplus.sh)
 
 for TARGET_OS in $*;
 do
@@ -41,7 +42,7 @@ do
 		--volume="$(pwd)":/xc16plusplus-build \
 		--workdir=/xc16plusplus-build \
 		xc16plusplus-build:"$TARGET_OS" \
-		bash ./xc16plusplus_only.sh "$TARGET_OS"
+		bash ./build_xc16plusplus.sh "$TARGET_OS"
 
 	# Fill $RELEASE_DIRNAME directory
 	mkdir "../$RELEASE_DIRNAME"
@@ -99,4 +100,10 @@ do
 	fi
 
 	popd
+
+	# Remove temporary $RELEASE_DIRNAME directory
+	rm -rf "../$RELEASE_DIRNAME"
 done
+
+# Remove build files
+cd .. && rm -rf src
