@@ -73,11 +73,9 @@ then
 	exit 1
 fi
 
-CFLAGS=(-omf=$OMF -mcpu="$TARGET_CHIP")
-CXXFLAGS=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
-LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
-LDFLAGS=(-omf=$OMF -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
-LIBS=(-lc -lpic30 -lm)
+CFLAGS=()
+CXXFLAGS=()
+LDFLAGS=()
 
 if xc16ver_ge v1.20;
 then
@@ -89,6 +87,12 @@ if xc16ver_ge v1.25;
 then
 	CFLAGS+=(-no-legacy-libc)
 fi
+
+CFLAGS+=(-omf=$OMF -mcpu="$TARGET_CHIP")
+CXXFLAGS+=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
+LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
+LDFLAGS+=(-omf=$OMF -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
+LIBS=(-lc -lpic30 -lm)
 
 function __verboserun()
 {
