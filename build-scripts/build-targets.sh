@@ -52,26 +52,12 @@ do
 		../../../LICENSE-GPL3 \
 		../../../LICENSE-UNLICENSE \
 		../../../README.md \
-		../../../example-project/ \
-		../../../support-files/
+		../../../example-project/
 
-	# Set XC16 version in the XC16DIR path, uncomment the line corresponding
-	# to the target OS
-	case $TARGET_OS in
-		linux)
-			OSFOLDERPATTERN=opt
-			;;
-		osx)
-			OSFOLDERPATTERN=Applications
-			;;
-		win32)
-			OSFOLDERPATTERN=Program
-			;;
-	esac
-	sed \
-		-e "s,^#\?\(XC16DIR :=.*[/\\]\)v[0-9]\.[0-9]*,#\1$XC16_VERSION," \
-		-e "s,#\(XC16DIR :=.*$OSFOLDERPATTERN\),\1," \
-		-i example-project/Makefile
+	# Run and remove the Makefile-generator.sh script
+	example-project/Makefile-generator.sh $XC16_VERSION \
+		$TARGET_OS > example-project/Makefile
+	rm example-project/Makefile-generator.sh
 
 	# Create other customized files and, finally, a tar.gz/zip package
 	if [ "$TARGET_OS" == "win32" ];
@@ -83,7 +69,7 @@ do
 		# Convert text files to DOS line endings
 		unix2dos LICENSE-GPL3 LICENSE-UNLICENSE README.md \
 			bin/create_xc16plusplus_symlinks.cmd \
-			example-project/* support-files/*
+			example-project/*
 
 		zip -r9X "../$RELEASE_DIRNAME.zip" *
 	else
