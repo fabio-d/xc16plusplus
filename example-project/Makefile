@@ -14,7 +14,6 @@ TARGET_FAMILY := dsPIC33F
 XC16DIR := /opt/microchip/xc16/v1.26
 #XC16DIR := "C:\Program Files (x86)\Microchip\xc16\v1.26"
 #XC16DIR := /Applications/microchip/xc16/v1.26
-SUPPORTFILESDIR := ../support-files
 
 # Example options for the C compiler
 # Option -no-legacy-libc is only necessary for xc16 >= v1.25, older versions
@@ -26,7 +25,7 @@ CFLAGS := -mcpu=$(TARGET_CHIP) -mno-eds-warn -no-legacy-libc
 # are always required because this compiler does not support neither exceptions
 # nor runtime type identification (RTTI). -D__bool_true_and_false_are_defined is
 # only necessary if your code includes stdbool.h
-CXXFLAGS := $(CFLAGS) -I$(SUPPORTFILESDIR) -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined
+CXXFLAGS := $(CFLAGS) -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined
 
 LDSCRIPT := $(XC16DIR)/support/$(TARGET_FAMILY)/gld/p$(TARGET_CHIP).gld
 LDFLAGS := --local-stack -p$(TARGET_CHIP) --script $(LDSCRIPT) --heap=512 -L$(XC16DIR)/lib -L$(XC16DIR)/lib/$(TARGET_FAMILY)
@@ -44,11 +43,6 @@ all: result.hex
 
 # Rule to compile C++ source files (using the unofficial C++ compiler)
 %.o: %.cpp
-	$(XC16DIR)/bin/xc16-g++ $(CXXFLAGS) -c $< -o $@
-
-# Special rule to compile minilibstdc++.cpp, which is located in the
-# support-files directory
-minilibstdc++.o: $(SUPPORTFILESDIR)/minilibstdc++.cpp
 	$(XC16DIR)/bin/xc16-g++ $(CXXFLAGS) -c $< -o $@
 
 # Rule to link together object files created through distinct compiler invocations

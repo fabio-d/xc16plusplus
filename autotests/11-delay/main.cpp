@@ -1,6 +1,6 @@
 #define FCY 8000000
 
-#include <libpic30++.h>
+#include <libpic30.h>
 #include <stdio.h>
 
 int main (int argc, char *argv[])

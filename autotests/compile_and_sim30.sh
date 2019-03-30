@@ -35,7 +35,7 @@ function xc16ver_ge()
 }
 
 THISDIR="$(cd "$(dirname "$0")" && pwd)"
-SUPPORTFILESDIR="$(to_native_path "$THISDIR/../support-files")"
+EXAMPLEPROJECTDIR="$(to_native_path "$THISDIR/../example-project")"
 
 if [ "$XC16DIR" == "" ];
 then
@@ -89,7 +89,7 @@ then
 fi
 
 CFLAGS+=(-omf=$OMF -mcpu="$TARGET_CHIP")
-CXXFLAGS+=("${CFLAGS[@]}" -I$SUPPORTFILESDIR -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
+CXXFLAGS+=("${CFLAGS[@]}" -fno-exceptions -fno-rtti -D__bool_true_and_false_are_defined -std=gnu++0x)
 LDSCRIPT="$XC16DIR/support/$TARGET_FAMILY/gld/p$TARGET_CHIP.gld"
 LDFLAGS+=(-omf=$OMF -p"$TARGET_CHIP" --report-mem --script "$LDSCRIPT" --heap=512 -L"$XC16DIR/lib" -L"$XC16DIR/lib/$TARGET_FAMILY")
 LIBS=(-lc -lpic30 -lm)
@@ -123,7 +123,7 @@ do
 				__verboserun "$XC16DIR/bin/xc16-g++" \
 					"${CXXFLAGS[@]}" -c -o \
 					"$(to_native_path "$TEMPDIR/minilibstdc++.o")" \
-					"$(to_native_path "$SUPPORTFILESDIR/minilibstdc++.cpp")"
+					"$(to_native_path "$EXAMPLEPROJECTDIR/minilibstdc++.cpp")"
 				OBJFILES+=("$(to_native_path "$TEMPDIR/minilibstdc++.o")")
 			fi
 			mkdir -p "$(dirname "$TEMPDIR/$SRCFILE.o")"

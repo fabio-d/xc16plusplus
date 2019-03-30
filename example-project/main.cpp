@@ -3,7 +3,7 @@
 #include "timer1.h"
 
 #include <xc.h>
-#include <libpic30++.h>
+#include <libpic30.h>
 
 // Very minimal set of configuration bits, so that this example can be easily
 // ported to any PIC24/dsPIC chip
