@@ -90,21 +90,27 @@ file.
     * No exceptions
     * No RTTI (runtime type identification), e.g. `typeid` and `dynamic_cast`
       cannot be used
- * Extended data space (EDS) is not supported. If your chip has more than 32K
-   RAM, you will not be able to access any address above 32K from C++. Also,
+ * Extended data space (EDS) is only partly supported. In particular, objects
+   cannot be placed in EDS memory (because `this` is a 16-bit data pointer).
+ * Some EDS definitions that are valid in C are not supported in C++ parser,
+   such as the following example:
+```C
+// This syntax, which is valid C code, does not compile in XC16++
+int * __psv__ psv_pointer_to_int __attribute__((space(psv)));
+
+// You can use this equivalent snippet, which is accepted by XC16++
+typedef int *intstar;
+intstar __psv__ psv_pointer_to_int __attribute__((space(psv)));
+```
+ * If your code uses pointers to variables/objects allocated in the stack,
    make sure that your stack is located in the low 32K region (the
    `--local-stack` linker option, enabled by default, does exactly this).
- * Address space qualifiers, such as `__eds__`, are not understood by the C++
-   compiler.
  * The legacy C library (i.e. compiler option `-legacy-libc`) is not supported.
    If your XC16 version is 1.25 or newer, where `-legacy-libc` has become the
    default, make sure you set the `-no-legacy-libc` compiler option.
 
 ## Some tips
- * The standard `#include <libpic30.h>` does not compile in C++ (because
-   *libpic30.h* contains `__eds__`). Use the *libpic30++.h* file provided in the
-   *support-files* directory instead.
- * Compile *support-files/minilibstdc++.cpp* with your project (even if you do
+ * Include *example-project/minilibstdc++.cpp* with your project (even if you do
    not use dynamic memory allocation), otherwise some symbols will not be
    resolved successfully by the linker.
  * Always compile C++ code with `-fno-exceptions` and `-fno-rtti` to avoid
@@ -123,9 +129,6 @@ extern "C" void __attribute__((__interrupt__, __auto_psv__, __shadow__)) _T1Inte
   // Put C++ code here
 }
 ```
- * Extended data space is not supported by the C++ compiler, but if you want to
-   use the upper 32K RAM region you can write C code to access it and call it
-   from your C++ code.
 
 # License
 
