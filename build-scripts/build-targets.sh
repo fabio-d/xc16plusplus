@@ -41,7 +41,7 @@ do
 	docker run --tty --rm --user=$(id -u):$(id -g) \
 		--volume="$(pwd)":/xc16plusplus-build \
 		--workdir=/xc16plusplus-build \
-		xc16plusplus-build:"$TARGET_OS" \
+		xc16plusplus:"$TARGET_OS-build" \
 		bash ./build_xc16plusplus.sh "$TARGET_OS"
 
 	# Fill $RELEASE_DIRNAME directory

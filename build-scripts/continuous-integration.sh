@@ -1,11 +1,17 @@
 #!/bin/bash
+
+# This file is equivalent to the CI workflow that runs on GitHub.
+# It can be used to compile XC16++ locally.
+
 cd "$(dirname "$0")"
 set -ex
 
 # Build docker containers with the necessary compilation environment
-./build-containers.sh linux win32 osx
+./build-container.sh linux-build
+./build-container.sh win32-build
+./build-container.sh osx-build
 
-# Build all xc16++ variants
+# Build all XC16++ variants
 ./build-targets.sh v1.00 linux win32 osx
 ./build-targets.sh v1.10 linux win32 osx
 ./build-targets.sh v1.11 linux win32 osx

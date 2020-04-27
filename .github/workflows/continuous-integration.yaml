@@ -1,0 +1,96 @@
+name: Continuous Integration
+on: [push]
+
+jobs:
+  build-containers:
+    name: Build Container
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: # NOTE: the same values must also be set in the wipe-containers job
+        image-name: [linux-build, win32-build, osx-build]
+    steps:
+      - name: Checkout Metadata
+        uses: actions/checkout@v2
+
+      - name: Setup Image Cache
+        id: cache-image
+        uses: actions/cache@v1
+        with:
+          path: docker-images
+          key: docker-image-${{ matrix.image-name }}-${{ hashFiles(format('build-scripts/containers/{0}.Dockerfile', matrix.image-name)) }}
+
+      - name: Build Image
+        if: steps.cache-image.outputs.cache-hit != 'true'
+        run: |
+          build-scripts/build-container.sh ${{ matrix.image-name }}
+
+          # Save to image to file
+          mkdir docker-images
+          docker save -o docker-images/docker-${{ matrix.image-name }}.tar xc16plusplus:${{ matrix.image-name }}
+
+      - name: Propagate Image
+        uses: actions/upload-artifact@v1
+        with:
+          name: docker-image-${{ matrix.image-name }}
+          path: docker-images
+
+  build-xc16plusplus:
+    name: Build XC16++
+    needs: [build-containers]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [v1.00, v1.10, v1.11, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26]
+        target-os: [linux, win32, osx]
+    steps:
+      - name: Install Prerequisites
+        run: sudo apt-get install -y dos2unix
+
+      - name: Checkout Metadata
+        uses: actions/checkout@v2
+
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          repository: 'fabio-d/xc16plusplus-source'
+          ref: xc16++-${{ matrix.version }}
+          path: xc16plusplus-source
+
+      - name: Receive Docker Image
+        uses: actions/download-artifact@v1
+        with:
+          name: docker-image-${{ matrix.target-os }}-build
+          path: docker-images
+
+      - name: Load Docker Image
+        run: |
+          # Load the image produced by the previous job
+          docker load -i docker-images/docker-${{ matrix.target-os }}-build.tar
+
+      - name: Build XC16++
+        run: |
+          export XC16PLUSPLUS_SOURCE_REPO="$PWD/xc16plusplus-source"
+          build-scripts/build-targets.sh ${{ matrix.version }} ${{ matrix.target-os }}
+
+      - name: Propagate Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: xc16plusplus-${{ matrix.version }}-${{ matrix.target-os }}
+          path: build-scripts/build-${{ matrix.version }}/*.*
+
+  wipe-containers:
+    name: Wipe Containers
+    runs-on: ubuntu-latest
+    needs: [build-containers, build-xc16plusplus]
+    if: always()
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        image-name: [linux-build, win32-build, osx-build]
+    steps:
+      - name: Overwrite with an empty file to save space
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-image-${{ matrix.image-name }}
+          path: /dev/null
