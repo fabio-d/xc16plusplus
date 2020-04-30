@@ -29,15 +29,15 @@ cd "build-$XC16_VERSION"
 git clone "$XC16PLUSPLUS_SOURCE_REPO" src --depth 1 -b "xc16++-$XC16_VERSION"
 cd src
 
-# Read xc16++ version
-XC16PLUSPLUS_VERSION=$(sed -n 's/.*XC16PLUSPLUS_VERSION=\(v[^ ]*\).*/\1/p' build_xc16plusplus.sh)
+# Read XC16++ revision
+XC16PLUSPLUS_REVISION=r$(sed -n 's/^XC16PLUSPLUS_REVISION=\([0-9]*\).*/\1/p' build_xc16plusplus.sh)
 
 for TARGET_OS in $*;
 do
 	INSTALL_DIR="$(pwd)"/install-"$TARGET_OS"
-	RELEASE_DIRNAME="xc16plusplus-$XC16PLUSPLUS_VERSION-$TARGET_OS-$XC16_VERSION"
+	RELEASE_DIRNAME="xc16plusplus-$XC16_VERSION$XC16PLUSPLUS_REVISION-$TARGET_OS"
 
-	# Compile xc16++ executables
+	# Compile XC16++ executables
 	docker run --tty --rm --user=$(id -u):$(id -g) \
 		--volume="$(pwd)":/xc16plusplus-build \
 		--workdir=/xc16plusplus-build \
