@@ -35,7 +35,7 @@ XC16PLUSPLUS_VERSION=$(sed -n 's/.*XC16PLUSPLUS_VERSION=\(v[^ ]*\).*/\1/p' build
 for TARGET_OS in $*;
 do
 	INSTALL_DIR="$(pwd)"/install-"$TARGET_OS"
-	RELEASE_DIRNAME="x16plusplus-$XC16PLUSPLUS_VERSION-$TARGET_OS-$XC16_VERSION"
+	RELEASE_DIRNAME="xc16plusplus-$XC16PLUSPLUS_VERSION-$TARGET_OS-$XC16_VERSION"
 
 	# Compile xc16++ executables
 	docker run --tty --rm --user=$(id -u):$(id -g) \
