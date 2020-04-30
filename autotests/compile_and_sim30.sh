@@ -111,6 +111,7 @@ for SRCFILE in "$@";
 do
 	case "$SRCFILE" in
 		*.c)
+			mkdir -p "$(dirname "$TEMPDIR/$SRCFILE.o")"
 			__verboserun "$XC16DIR/bin/xc16-gcc" "${CFLAGS[@]}" \
 				-c -o "$(to_native_path "$TEMPDIR/$SRCFILE.o")" \
 					"$(to_native_path "$SRCFILE")"
