@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Run a C/C++ program inside the sim30 simulator shipped with XC16
 #   Usage: ./compile_and_sim30.sh <source-files...>
 # If at least one C++ file is present, C++ support files are automatically
