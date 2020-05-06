@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: # NOTE: the same values must also be set in the wipe-containers job
-        image-name: [linux-build, win32-build, osx-build]
+        image-name: [linux-build, win32-build, osx-build, linux-test]
     steps:
       - name: Checkout Metadata
         uses: actions/checkout@v2
@@ -56,16 +56,26 @@ jobs:
           ref: xc16++-${{ matrix.version }}
           path: xc16plusplus-source
 
-      - name: Receive Docker Image
+      - name: Receive "${{ matrix.target-os }}-build" Docker Image
         uses: actions/download-artifact@v1
         with:
           name: docker-image-${{ matrix.target-os }}-build
           path: docker-images
 
-      - name: Load Docker Image
+      - name: Receive "${{ matrix.target-os }}-test" Docker Image
+        uses: actions/download-artifact@v1
+        if: matrix.target-os == 'linux' # Only linux is supported at the moment
+        with:
+          name: docker-image-${{ matrix.target-os }}-test
+          path: docker-images
+
+      - name: Load Docker Images
         run: |
-          # Load the image produced by the previous job
-          docker load -i docker-images/docker-${{ matrix.target-os }}-build.tar
+          # Load the images produced by the previous job
+          for IMAGE_FILE in docker-images/*;
+          do
+            docker load -i "$IMAGE_FILE"
+          done
 
       - name: Build XC16++
         run: |
@@ -78,6 +88,20 @@ jobs:
           name: xc16plusplus-${{ matrix.version }}-${{ matrix.target-os }}
           path: build-scripts/build-${{ matrix.version }}/*.*
 
+      - name: Test XC16++
+        if: matrix.target-os == 'linux' # Only linux is supported at the moment
+        env:
+          TESTPACK_TOKEN: ${{ secrets.TESTPACK_TOKEN }}
+        run: |
+          # Retrieve the preinstalled environment from a private location
+          ${{ secrets.TESTPACK_RETR }} xc16-${{ matrix.version }}-${{ matrix.target-os }}.tar.xz
+
+          # Run XC16++ and verify the results
+          export XC16PLUSPLUS_SOURCE_REPO="$PWD/xc16plusplus-source"
+          build-scripts/test-in-container.sh ${{ matrix.version }} ${{ matrix.target-os }} \
+            xc16-${{ matrix.version }}-${{ matrix.target-os }}.tar.xz \
+            build-scripts/build-${{ matrix.version }}/*.*
+
   wipe-containers:
     name: Wipe Containers
     runs-on: ubuntu-latest
@@ -87,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: [linux-build, win32-build, osx-build]
+        image-name: [linux-build, win32-build, osx-build, linux-test]
     steps:
       - name: Overwrite with an empty file to save space
         uses: actions/upload-artifact@v2
