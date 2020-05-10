@@ -16,7 +16,7 @@ set -ex
 # relevant ones.
 #
 ./build-container.sh linux-build
-./build-container.sh win32-build
+./build-container.sh windows-build
 ./build-container.sh osx-build
 ./build-container.sh linux-test
 
@@ -28,16 +28,16 @@ set -ex
 # arguments can be omitted or specified in any order depending on the
 # desired target operating system(s).
 #
-./build-targets.sh v1.00 linux win32 osx
-./build-targets.sh v1.10 linux win32 osx
-./build-targets.sh v1.11 linux win32 osx
-./build-targets.sh v1.20 linux win32 osx
-./build-targets.sh v1.21 linux win32 osx
-./build-targets.sh v1.22 linux win32 osx
-./build-targets.sh v1.23 linux win32 osx
-./build-targets.sh v1.24 linux win32 osx
-./build-targets.sh v1.25 linux win32 osx
-./build-targets.sh v1.26 linux win32 osx
+./build-targets.sh v1.00 linux windows osx
+./build-targets.sh v1.10 linux windows osx
+./build-targets.sh v1.11 linux windows osx
+./build-targets.sh v1.20 linux windows osx
+./build-targets.sh v1.21 linux windows osx
+./build-targets.sh v1.22 linux windows osx
+./build-targets.sh v1.23 linux windows osx
+./build-targets.sh v1.24 linux windows osx
+./build-targets.sh v1.25 linux windows osx
+./build-targets.sh v1.26 linux windows osx
 
 # Test Linux variants (only Linxu builds can be tested in docker at the moment)
 #

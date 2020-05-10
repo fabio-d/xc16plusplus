@@ -4,7 +4,7 @@ cd "$(dirname "$0")"
 if [ "$#" -lt 2 ];
 then
 	echo "Usage: $0 vN.NN os [src-dir]"
-	echo "os can be linux, win32 or osx"
+	echo "os can be linux, windows or osx"
 	echo "Optional src-dir is e.g. /opt/microchip/xc16/v1.00. If not specified, the default one will be assumed"
 	exit 1
 fi
@@ -17,7 +17,7 @@ case "$OS" in
 	linux)
 		DEFAULT_XC16DIR='/opt/microchip/xc16/'$XC16VER
 		;;
-	win32)
+	windows)
 		DEFAULT_XC16DIR='"C:\Program Files (x86)\Microchip\xc16\'$XC16VER'"'
 		;;
 	osx)

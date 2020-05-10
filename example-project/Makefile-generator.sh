@@ -4,14 +4,14 @@ case "$2" in
 	linux)
 		XC16DIR='/opt/microchip/xc16/'$XC16VER
 		;;
-	win32)
+	windows)
 		XC16DIR='"C:\Program Files (x86)\Microchip\xc16\'$XC16VER'"'
 		;;
 	osx)
 		XC16DIR='/Applications/microchip/xc16/'$XC16VER
 		;;
 	*)
-		echo "Usage: $0 vN.NN <linux | win32 | osx>"
+		echo "Usage: $0 vN.NN <linux | windows | osx>"
 		exit 1
 esac
 

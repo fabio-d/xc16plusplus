@@ -3,7 +3,7 @@
 if [ "$#" -lt 2 ];
 then
 	echo "Usage: $0 vN.NN OS xc16-vN.NN-OS.tar.xz xc16plusplus-vN.NNrXX-OS"
-	echo "OS can be linux, win32 or osx"
+	echo "OS can be linux, windows or osx"
 	echo "xc16-vN.NN-OS.tar.xz is an archive produced by the pack-xc16-binaries.sh tool"
 	echo "xc16plusplus-vN.NNrXX-OS.tar.gz/.zip is a XC16++ package build by the build-targets.sh tool"
 	exit 1
@@ -28,10 +28,10 @@ case "$OS" in
 		XC16DIR='/opt/microchip/xc16/'$XC16VER
 		cp "$PWD/test-in-container-linux-helper.sh" "$TMPDIR/helper.sh"
 		;;
-	win32)
-		echo Testing win32 target is not supported yet && exit 1
+	windows)
+		echo Testing windows target is not supported yet && exit 1
 		XC16DIR='"C:\Program Files (x86)\Microchip\xc16\'$XC16VER'"'
-		cp "$PWD/test-in-container-win32-helper.sh" "$TMPDIR/helper.sh"
+		cp "$PWD/test-in-container-windows-helper.sh" "$TMPDIR/helper.sh"
 		;;
 	osx)
 		echo Testing osx target is not supported yet && exit 1

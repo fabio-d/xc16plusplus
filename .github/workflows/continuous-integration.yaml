@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: # NOTE: the same values must also be set in the wipe-containers job
-        image-name: [linux-build, win32-build, osx-build, linux-test]
+        image-name: [linux-build, windows-build, osx-build, linux-test]
     steps:
       - name: Checkout Metadata
         uses: actions/checkout@v2
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         version: [v1.00, v1.10, v1.11, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26]
-        target-os: [linux, win32, osx]
+        target-os: [linux, windows, osx]
     steps:
       - name: Install Prerequisites
         run: sudo apt-get install -y dos2unix
@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: [linux-build, win32-build, osx-build, linux-test]
+        image-name: [linux-build, windows-build, osx-build, linux-test]
     steps:
       - name: Overwrite with an empty file to save space
         uses: actions/upload-artifact@v2
