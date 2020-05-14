@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [v1.00, v1.10, v1.11, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26]
+        version: [v1.00, v1.10, v1.11, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26, v1.30, v1.31, v1.32, v1.33, v1.34, v1.35, v1.36, v1.40, v1.41, v1.49, v1.50]
         target-os: [linux, windows, osx]
     steps:
       - name: Install Prerequisites
@@ -62,9 +62,12 @@ jobs:
           name: docker-image-${{ matrix.target-os }}-build
           path: docker-images
 
+        # Only linux builds can be tested at the moment.
+        # Version v1.49 cannot be tested because it only works with a "Functional Safety"
+        # XC16 license.
       - name: Receive "${{ matrix.target-os }}-test" Docker Image
         uses: actions/download-artifact@v1
-        if: matrix.target-os == 'linux' # Only linux is supported at the moment
+        if: matrix.target-os == 'linux' && matrix.version != 'v1.49'
         with:
           name: docker-image-${{ matrix.target-os }}-test
           path: docker-images
@@ -88,8 +91,9 @@ jobs:
           name: xc16plusplus-${{ matrix.version }}-${{ matrix.target-os }}
           path: build-scripts/build-${{ matrix.version }}/*.*
 
+        # See comment above
       - name: Test XC16++
-        if: matrix.target-os == 'linux' # Only linux is supported at the moment
+        if: matrix.target-os == 'linux' && matrix.version != 'v1.49'
         env:
           TESTPACK_TOKEN: ${{ secrets.TESTPACK_TOKEN }}
         run: |
