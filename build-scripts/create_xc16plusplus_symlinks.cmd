@@ -13,8 +13,8 @@
 )
 
 @set success=1
-@if %success% equ 1 call:createlinkorcopy "xc16-gcc.exe" "xc16-g++.exe"
-@if %success% equ 1 call:createlinkorcopy "xc16-cc1.exe" "xc16-cc1plus.exe"
+@if %success% equ 1 call:createcopy "xc16-gcc.exe" "xc16-g++.exe"
+@if %success% equ 1 call:createcopy "xc16-cc1.exe" "xc16-cc1plus.exe"
 
 cd bin
 @if %errorlevel% neq 0 (
@@ -22,22 +22,20 @@ cd bin
 	goto:done
 )
 
-@if %success% equ 1 call:createlinkorcopy "coff-pa.exe" "coff-paplus.exe"
-@if %success% equ 1 call:createlinkorcopy "elf-pa.exe" "elf-paplus.exe"
+@if %success% equ 1 call:createcopy "coff-pa.exe" "coff-paplus.exe"
+@if %success% equ 1 call:createcopy "elf-pa.exe" "elf-paplus.exe"
 
-@if %success% equ 1 echo SUCCESS: All symbolic links have been created successfully
+@if %success% equ 1 echo SUCCESS: All files have been created successfully
 
 :done
+@if "%1"=="nopause" goto:eof
 @pause
 @goto:eof
 
-:createlinkorcopy
-mklink "%~2" "%~1"
-@if %errorlevel% equ 0 goto:eof
-@echo WARNING: Failed to create a symbolic link, reverting to plain old file copy
+:createcopy
 copy "%~1" "%~2"
 @if %errorlevel% equ 0 goto:eof
-@echo FATAL ERROR: File copy failed too, please check your permissions
+@echo FATAL ERROR: File copy failed, please check your permissions
 @echo (this script must be run as Administrator)
 @set success=0
 @goto:eof

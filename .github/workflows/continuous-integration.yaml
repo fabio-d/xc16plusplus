@@ -2,12 +2,12 @@ name: Continuous Integration
 on: [push]
 
 jobs:
-  build-containers:
-    name: Build Container
+  build-images:
+    name: Image
     runs-on: ubuntu-latest
     strategy:
-      matrix: # NOTE: the same values must also be set in the wipe-containers job
-        image-name: [linux-build, windows-build, osx-build, linux-test]
+      matrix: # NOTE: the same values must also be set in the wipe-images job
+        image-name: [linux-build, windows-build, osx-build, linux-test-compile, windows-test-compile, osx-test-compile, all-test-validate]
     steps:
       - name: Checkout Metadata
         uses: actions/checkout@v2
@@ -22,11 +22,12 @@ jobs:
       - name: Build Image
         if: steps.cache-image.outputs.cache-hit != 'true'
         run: |
-          build-scripts/build-container.sh ${{ matrix.image-name }}
+          build-scripts/prepare-container.sh ${{ matrix.image-name }}
 
           # Save to image to file
           mkdir docker-images
           docker save -o docker-images/docker-${{ matrix.image-name }}.tar xc16plusplus:${{ matrix.image-name }}
+          gzip docker-images/docker-${{ matrix.image-name }}.tar # compress it
 
       - name: Propagate Image
         uses: actions/upload-artifact@v1
@@ -35,8 +36,8 @@ jobs:
           path: docker-images
 
   build-xc16plusplus:
-    name: Build XC16++
-    needs: [build-containers]
+    name: XC16++
+    needs: [build-images]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,65 +58,120 @@ jobs:
           path: xc16plusplus-source
 
       - name: Receive "${{ matrix.target-os }}-build" Docker Image
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: docker-image-${{ matrix.target-os }}-build
           path: docker-images
 
-        # Only linux builds can be tested at the moment.
-        # Version v1.49 cannot be tested because it only works with a "Functional Safety"
-        # XC16 license.
-      - name: Receive "${{ matrix.target-os }}-test" Docker Image
-        uses: actions/download-artifact@v1
-        if: matrix.target-os == 'linux' && matrix.version != 'v1.49'
+        # Version v1.49 cannot be tested because a nonfree XC16 license is required
+      - name: Receive "${{ matrix.target-os }}-test-compile" Docker Image
+        uses: actions/download-artifact@v2
+        id: download-test-compile-image
+        if: matrix.version != 'v1.49'
         with:
-          name: docker-image-${{ matrix.target-os }}-test
+          name: docker-image-${{ matrix.target-os }}-test-compile
           path: docker-images
 
       - name: Load Docker Images
         run: |
-          # Load the images produced by the previous job
+          # Load the images retrieved by the previous steps
           for IMAGE_FILE in docker-images/*;
           do
             docker load -i "$IMAGE_FILE"
           done
 
-      - name: Build XC16++
+      - name: Build XC16++ Package
         run: |
           export XC16PLUSPLUS_SOURCE_REPO="$PWD/xc16plusplus-source"
-          build-scripts/build-targets.sh ${{ matrix.version }} ${{ matrix.target-os }}
+          build-scripts/build-in-container.sh ${{ matrix.version }} ${{ matrix.target-os }}
 
-      - name: Propagate Output
+        # Append the output package "xc16plusplus-vN.NNrXX-OS.tar.gz" (or .zip) to the
+        # "xc16plusplus-packages" artifact
+      - name: Propagate XC16++ Package
         uses: actions/upload-artifact@v2
         with:
-          name: xc16plusplus-${{ matrix.version }}-${{ matrix.target-os }}
-          path: build-scripts/build-${{ matrix.version }}/*.*
+          name: xc16plusplus-packages
+          path: build-scripts/build-${{ matrix.version }}/xc16plusplus-*
 
-        # See comment above
-      - name: Test XC16++
-        if: matrix.target-os == 'linux' && matrix.version != 'v1.49'
+      - name: Compile Tests
+        id: compile-tests
+        if: steps.download-test-compile-image.outcome == 'success' # Some versions cannot be tested
+        continue-on-error: true
         env:
           TESTPACK_TOKEN: ${{ secrets.TESTPACK_TOKEN }}
         run: |
+          cd build-scripts
+
           # Retrieve the preinstalled environment from a private location
           ${{ secrets.TESTPACK_RETR }} xc16-${{ matrix.version }}-${{ matrix.target-os }}.tar.xz
+          unset TESTPACK_TOKEN
 
-          # Run XC16++ and verify the results
-          export XC16PLUSPLUS_SOURCE_REPO="$PWD/xc16plusplus-source"
-          build-scripts/test-in-container.sh ${{ matrix.version }} ${{ matrix.target-os }} \
-            xc16-${{ matrix.version }}-${{ matrix.target-os }}.tar.xz \
-            build-scripts/build-${{ matrix.version }}/*.*
+          # Run the tests' compilation phase
+          if [ "${{ matrix.target-os }}" == "osx" ];
+          then
+            # set some kernel knobs for maloader
+            sudo ./test-compile-in-container-osx-host-init.sh
+          fi
+          ./test-compile-in-container.sh ${{ matrix.version }} ${{ matrix.target-os }}
 
-  wipe-containers:
-    name: Wipe Containers
+        # Append the output package "test-bundle-vN.NN-OS.zip" (or .zip) to the
+        # "test-bundles" artifact
+      - name: Propagate Compiled Tests
+        uses: actions/upload-artifact@v2
+        if: steps.compile-tests.outcome == 'success'
+        with:
+          name: test-bundles
+          path: build-scripts/build-${{ matrix.version }}/test-bundle-*
+
+  validate-tests:
+    name: Validate Tests
     runs-on: ubuntu-latest
-    needs: [build-containers, build-xc16plusplus]
+    needs: [build-images, build-xc16plusplus]
+    continue-on-error: true
+    steps:
+      - name: Checkout Metadata
+        uses: actions/checkout@v2
+
+      - name: Receive "all-test-validate" Docker Image
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-image-all-test-validate
+          path: docker-images
+
+      - name: Load Docker Image
+        run: |
+          # Load the image retrieved by the previous step
+          for IMAGE_FILE in docker-images/*;
+          do
+            docker load -i "$IMAGE_FILE"
+          done
+
+      - name: Retrieve Compiled Tests
+        uses: actions/download-artifact@v2
+        with:
+          name: test-bundles
+          path: test-bundles
+
+      - name: Validate Tests
+        run: |
+          build-scripts/test-validate-in-container.sh test-report.zip test-bundles/*
+
+      - name: Propagate Test Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-report
+          path: test-report.zip
+
+  wipe-images:
+    name: Wipe Image
+    runs-on: ubuntu-latest
+    needs: [build-images, build-xc16plusplus, validate-tests]
     if: always()
     continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
-        image-name: [linux-build, windows-build, osx-build, linux-test]
+        image-name: [linux-build, windows-build, osx-build, linux-test-compile, windows-test-compile, osx-test-compile, all-test-validate]
     steps:
       - name: Overwrite with an empty file to save space
         uses: actions/upload-artifact@v2

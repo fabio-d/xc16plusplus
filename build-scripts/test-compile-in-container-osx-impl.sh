@@ -14,8 +14,8 @@ XC16PLUSPLUSPKG="$(echo /xc16plusplus-test/binaries-xc16plusplus/*)"
 echo "Installing compiler..."
 
 # XC16
-mkdir -p /opt/microchip/xc16/$XC16VER
-cd /opt/microchip/xc16/$XC16VER
+mkdir -p /Applications/microchip/xc16/$XC16VER
+cd /Applications/microchip/xc16/$XC16VER
 tar xJf "$XC16PKG" --strip-components=1
 
 # XC16++
@@ -27,7 +27,7 @@ mv bin/* -t ../../bin/bin
 cd ../../
 rm -rf xc16plusplus-tmp
 
-echo "Running autotests..."
-cd /xc16plusplus-test/autotests
+echo "Compiling tests..."
 
-./run_all_tests.sh -k /opt/microchip/xc16/$XC16VER
+cd /xc16plusplus-test/autotests
+python3 -um testrun compile /Applications/microchip/xc16/$XC16VER -o ../output-bundle.zip
