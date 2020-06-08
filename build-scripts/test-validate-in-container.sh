@@ -52,7 +52,7 @@ trap "rm -rf $TMPDIR" exit
 
 # We have to set the initial working directory to /tmp because that will be set
 # as the home directory, and mbd needs a writable home.
-docker run --tty --rm --user=$(id -u):$(id -g) \
+docker run --net=none --rm --user=$(id -u):$(id -g) \
 	--volume="$PWD"/..:/xc16plusplus:ro \
 	--volume="$TMPDIR":/output-dir \
 	"${!VOLUME_OPTS[@]}" \

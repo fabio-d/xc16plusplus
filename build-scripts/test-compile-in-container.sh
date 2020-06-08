@@ -63,7 +63,7 @@ do
 
 		cp -r "../autotests" "../example-project" -t "$TMPDIR"
 
-		docker run --tty --rm --user=$(id -u):$(id -g) \
+		docker run --net=none --rm --user=$(id -u):$(id -g) \
 			--volume="$TMPDIR":/xc16plusplus-test \
 			xc16plusplus:$OS-test-compile \
 			/xc16plusplus-test/helper.sh $XC16VER $OS

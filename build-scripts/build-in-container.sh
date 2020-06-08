@@ -45,7 +45,7 @@ do
 	RELEASE_DIRNAME="xc16plusplus-$XC16_VERSION$XC16PLUSPLUS_REVISION-$TARGET_OS"
 
 	# Compile XC16++ executables
-	docker run --tty --rm --user=$(id -u):$(id -g) \
+	docker run --net=none --rm --user=$(id -u):$(id -g) \
 		--volume="$(pwd)":/xc16plusplus-build \
 		--workdir=/xc16plusplus-build \
 		xc16plusplus:"$TARGET_OS-build" \
