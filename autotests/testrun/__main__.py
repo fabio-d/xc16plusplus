@@ -10,6 +10,7 @@ from .base_test import CompilationEnvironment, CompilationOutput, \
 from .bundle_io import BundleReader, BundleRecord, BundleWriter
 from .call_in_subprocess import call_and_capture_output
 from .compiler_version import CompilerVersion
+from .firmware_runner import FirmwareRunner
 from .report_writer import ReportWriter
 from .test_loader import TestLoader, error_if_unexpected_working_directory
 
@@ -150,6 +151,18 @@ def do_validate(args):
         sys.exit('One or more tests FAILED')
 
 
+def do_runfw(args):
+    mplabx_abspath = os.path.abspath(args.mplabx_path)
+    with open(args.firmware, 'rb') as fp:
+        hex_file_payload = fp.read()
+
+    fwr = FirmwareRunner(mplabx_abspath, args.target)
+    result = fwr.run(hex_file_payload)
+
+    print('UART output:')
+    sys.stdout.buffer.write(result.uart_output)
+
+
 def main():
     parser = argparse.ArgumentParser(description='XC16++ test runner')
     subparsers = parser.add_subparsers(metavar='COMMAND',
@@ -183,6 +196,18 @@ def main():
     parser_validate.add_argument('-o', '--output', metavar='OUTPUT_REPORT.zip',
                                  help='output report file', required=True)
     parser_validate.set_defaults(func=do_validate)
+
+    # parser for 'runfw' command
+    parser_runfw = subparsers.add_parser('runfw',
+                                         help='run firmware with UART output')
+    parser_runfw.add_argument('mplabx_path',
+                              help='path to MPLAB X installation directory, '
+                                   'such as /opt/microchip/mplabx/v5.30')
+    parser_runfw.add_argument('firmware', metavar='FIRMWARE.hex',
+                              help='HEX image of firmware')
+    parser_runfw.add_argument('target',
+                              help='name of chip to be emulated')
+    parser_runfw.set_defaults(func=do_runfw)
 
     args = parser.parse_args()
 

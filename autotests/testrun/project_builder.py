@@ -20,6 +20,7 @@ class ProjectBuilder:
         :param target: A (family, chip) tuple.
         """
         target_family, target_chip = target
+        assert omf in ('coff', 'elf')
         self.omf = omf
         self.c_exec = os.path.join(compiler_abspath, 'bin/xc16-gcc')
         self.cxx_exec = os.path.join(compiler_abspath, 'bin/xc16-g++')
@@ -66,7 +67,8 @@ class ProjectBuilder:
             '-std=gnu++0x'
         ]
 
-        self.source_files = []
+        # source_file_path -> list_of_specific_options
+        self.source_files = dict()
 
     def build(self):
         with tempfile.TemporaryDirectory() as out_dir:
@@ -74,7 +76,7 @@ class ProjectBuilder:
             compilation_failed = False
 
             # Compile source files
-            for source_path in self.source_files:
+            for source_path, extra_options in self.source_files.items():
                 if source_path.endswith('.c'):
                     compiler_exec = self.c_exec
                     compiler_flags = self.cflags
@@ -89,11 +91,12 @@ class ProjectBuilder:
                 object_file_name = '%s.o' % name_without_ext
                 log_file_name = '%s.log' % name_without_ext
 
-                cmd_line = [
-                               compiler_exec,
-                               '-c', os.path.abspath(source_path),
-                               '-o', object_file_name
-                           ] + compiler_flags
+                cmd_line = \
+                    [
+                        compiler_exec,
+                        '-c', os.path.abspath(source_path),
+                        '-o', object_file_name
+                    ] + compiler_flags + extra_options
 
                 exit_code = ProjectBuilder._run_with_log(cmd_line, out_dir)
 
@@ -108,11 +111,12 @@ class ProjectBuilder:
                 firmware_obj = 'firmware.%s' % self.omf
                 firmware_map = 'firmware.map'
 
-                cmd_line = [self.ld_exec] + self.ldflags + object_files + [
-                    '-o', firmware_obj,
-                    '--save-gld=' + firmware_gld,
-                    '-Map=' + firmware_map
-                ] + self.libs
+                cmd_line = \
+                    [self.ld_exec] + self.ldflags + object_files + [
+                        '-o', firmware_obj,
+                        '--save-gld=' + firmware_gld,
+                        '-Map=' + firmware_map
+                    ] + self.libs
 
                 exit_code = ProjectBuilder._run_with_log(cmd_line, out_dir)
 
@@ -124,11 +128,12 @@ class ProjectBuilder:
 
             if not compilation_failed:
                 firmware_hex = 'firmware.hex'
-                cmd_line = [
-                    self.bin2hex_exec,
-                    '-omf=' + self.omf,
-                    firmware_obj
-                ]
+                cmd_line = \
+                    [
+                        self.bin2hex_exec,
+                        '-omf=' + self.omf,
+                        firmware_obj
+                    ]
 
                 exit_code = ProjectBuilder._run_with_log(cmd_line, out_dir)
 

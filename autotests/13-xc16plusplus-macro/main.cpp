@@ -1,12 +1,13 @@
 #include <stdio.h>
 
+static int useNumber;
+
 int main (int argc, char *argv[])
 {
 #ifdef __XC16PLUSPLUS__
-	printf("OK\n");
+	int expectNumber = __XC16PLUSPLUS_REVISION__;
 #endif
 
-	int expectNumber = __XC16PLUSPLUS_REVISION__;
-
+    useNumber = expectNumber;
 	return 0;
 }
