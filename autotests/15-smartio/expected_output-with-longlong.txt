@@ -1,0 +1,8 @@
+test no-smart-io
+test arg none
+test c c
+test xyz xyz
+test 678 678
+test 3.14 3.14
+test 3.14 xyz
+test 1234567890987654321 1234567890987654321
