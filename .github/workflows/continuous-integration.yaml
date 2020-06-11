@@ -6,7 +6,7 @@ jobs:
     name: Image
     runs-on: ubuntu-latest
     strategy:
-      matrix: # NOTE: the same values must also be set in the wipe-images job
+      matrix:
         image-name: [linux-build, windows-build, osx-build, linux-test-compile, windows-test-compile, osx-test-compile, all-test-validate]
     steps:
       - name: Checkout Metadata
@@ -161,20 +161,3 @@ jobs:
         with:
           name: test-report
           path: test-report.zip
-
-  wipe-images:
-    name: Wipe Image
-    runs-on: ubuntu-latest
-    needs: [build-images, build-xc16plusplus, validate-tests]
-    if: always()
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        image-name: [linux-build, windows-build, osx-build, linux-test-compile, windows-test-compile, osx-test-compile, all-test-validate]
-    steps:
-      - name: Overwrite with an empty file to save space
-        uses: actions/upload-artifact@v2
-        with:
-          name: docker-image-${{ matrix.image-name }}
-          path: /dev/null
