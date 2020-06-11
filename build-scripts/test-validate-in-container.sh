@@ -45,7 +45,7 @@ do
 done
 
 cd "$(dirname "$0")"
-set -x
+set +e -x
 
 TMPDIR="$(mktemp -d)"
 trap "rm -rf $TMPDIR" exit
@@ -59,5 +59,7 @@ docker run --net=none --rm --user=$(id -u):$(id -g) \
 	-w /tmp \
 	xc16plusplus:all-test-validate \
 	sh -c 'cd /xc16plusplus/autotests && python3 -um testrun validate /opt/microchip/mplabx/v5.40 "$@"' --  --output "/output-dir/report.zip" "${VOLUME_OPTS[@]}"
+EXIT_CODE=$?
 
 cp -v "$TMPDIR/report.zip" "$OUTPUT_FILE"
+exit $EXIT_CODE

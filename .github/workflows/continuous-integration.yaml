@@ -153,10 +153,12 @@ jobs:
           path: test-bundles
 
       - name: Validate Tests
+        id: validate-tests
         run: |
           build-scripts/test-validate-in-container.sh test-report.zip test-bundles/*
 
       - name: Propagate Test Report
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: test-report
