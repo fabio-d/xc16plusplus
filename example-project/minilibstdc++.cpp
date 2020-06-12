@@ -31,7 +31,7 @@ extern "C" __attribute__((noreturn, naked)) void __cxa_pure_virtual()
 }
 
 #ifdef __XC16ELF
-// If we are using the ELF object format, the follwing symbols are required by
+// If we are using the ELF object format, the following symbols are required by
 // the code that initialized statically-allocated global objects. COFF uses a
 // different ABI and does not need them
 void *__dso_handle = 0;

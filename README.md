@@ -8,43 +8,39 @@ It is neither endorsed nor supported in any form by Microchip.
 
 Precompiled packages are available. They contain some executables that can be
 **added to an existing XC16 installation** to enable the C++ language (choose
-the one that matches your XC16 version). XC16++ precompiled executables, full
-source code and patches can be **downloaded at
+the one that matches your XC16 version and operating system). Precompiled XC16++
+executables can be **downloaded at
 https://github.com/fabio-d/xc16plusplus/releases**.
 
 Installation instructions are provided below in this document.
 
-This repository (*xc16plusplus*) only contains source code in form of patches
-that can be applied to Microchip's official source code (available at
+This project is based on Microchip's official source code (available at
 [Microchip's MPLAB-XC website](https://www.microchip.com/mplab/compilers) under
-the *Downloads Archive* tab).
-
-The same code, but in form of already-patched source trees is kept in the
-companion development
+the *Downloads Archive* tab). Full source code of the C++ compiler executables
+(i.e. source code from Microchip, with some patches to enable C++ support) can
+be found in the
 [xc16plusplus-source](https://github.com/fabio-d/xc16plusplus-source/branches/all)
 repository (there is one branch for each supported XC16 version).
 
 ## About XC16 (the official Microchip compiler)
 
 The official XC16 compiler is actually a modified `gcc` version targeting PIC24
-and dsPIC chips. The XC16 distribution also includes other software, but what is
-important for our purposes is that since `gcc` is a GPLv3 project, the XC16
-compiler sources are also covered by the GPLv3. They can be downloaded from
-Microchip's website (see previous section). The only officially supported
-language is C but, given that `gcc` also supports C++, it is possible to
-recompile `gcc` and enable `g++`!
+and dsPIC chips. In fact, the XC16 distribution also includes some proprietary
+software; however, since `gcc` is a GPLv3 project, the XC16 compiler sources are
+also covered by the GPLv3. They can be downloaded from Microchip's website (see
+previous section). The only officially supported language is C but, given that
+`gcc` also supports C++, it is possible to recompile it with a different set
+of configuration flags and enable the C++ frontend too!
 
-It actually takes a little more effort to obtain a working C++ compiler, and
-this repository hosts some patches I created. The following section shows how to
-apply them to Microchip's XC16 source releases, compile and install the C++
-compiler on top of an existing XC16 installation.
+It actually takes a little more effort to obtain a *working* C++ compiler, and
+this project hosts some patches and auxiliary files to make it possible.
 
 Note that it is not possible to ship a stand-alone C++ compiler that does not
-require an existing XC16 installation, because all Microchip-supplied header
+require an existing XC16 installation, because some Microchip-supplied header
 files, software libraries, linker scripts and even some pieces of the compiler
-infrastructure are proprietary.
+pipeline are proprietary.
 
-## Installation on top of an existing XC16 installation from binary packages
+## Installation
 
 If you download a precompiled XC16++ package, you will find the following files
 in its `bin/bin` subdirectory:
@@ -53,9 +49,8 @@ in its `bin/bin` subdirectory:
  * `elf-cc1plus` (Linux and OS X) or `elf-cc1plus.exe` (Windows)
  * `elf-g++` (Linux and OS X) or `elf-g++.exe` (Windows)
 
-They must be copied to the `bin/bin` directory of the main XC16 installation,
-whose path can vary according to how XC16 was installed. The default path is
-(assuming XC16 version 1.24):
+They must be copied to the `bin/bin` directory of an existing XC16 installation.
+The default path is (assuming XC16 version 1.24):
  * `/opt/microchip/xc16/v1.24/bin/bin` (Linux)
  * `C:\Program Files (x86)\Microchip\xc16\v1.24\bin\bin` (Windows)
  * `/Applications/microchip/xc16/v1.24/bin/bin` (OS X)
@@ -69,12 +64,13 @@ executables:
  * `bin/bin/coff-paplus` (symlink to `coff-pa`)
  * `bin/bin/elf-paplus` (symlink to `elf-pa`)
 
-On **Windows**, you need Administrator rights in order to create symbolic links.
+On **Windows**, you have to copy those files, instead of symlinking them.
 Therefore, no symbolic links are included in Windows packages. Instead, a
 `bin\create_xc16plusplus_symlinks.cmd` is provided, which can be copied to
-XC16's `bin` directory and run as Administrator to automatically create the
-symbolic links directly on the target system. After creating the links, the
-script will show a confirmation message. You can delete it afterwards.
+XC16's `bin` directory (the outer one, not `bin\bin`!) and run as Administrator
+to automatically copy the necessary files directly on the target system. After
+creating the copies, the script will show a confirmation message. You can delete
+it afterwards.
 
 ## Building XC16++ from source
 
@@ -83,7 +79,7 @@ There are several ways to build XC16++, as documented in the
 file.
 
 ## Limitations
- * There is no libstdc++, therefore all C++ features that rely on external
+ * There is no libstdc++. Therefore, all C++ features that rely on external
    libraries are not available:
     * No `std::cout` / `std::cerr`
     * No STL
@@ -122,7 +118,7 @@ intstar __psv__ psv_pointer_to_int __attribute__((space(psv)));
  * C symbols referenced from C++ code will not be resolved correctly unless they
    are marked as `extern "C"`.
  * Interrupt service routines written in C++ must be marked as `extern "C"` too,
-   for example:
+   for instance:
 ```C++
 extern "C" void __attribute__((__interrupt__, __auto_psv__, __shadow__)) _T1Interrupt(void)
 {
@@ -132,12 +128,18 @@ extern "C" void __attribute__((__interrupt__, __auto_psv__, __shadow__)) _T1Inte
 
 # License
 
-Patches are released under the same license as the portion of the XC16 source
-code they apply to, i.e. GNU General Public License, version 3 or (if
-applicable) later. A copy of the GNU General Public License is available in this
-repository (see file *LICENSE-GPL3*). The GPL **does not** extend to programs
-compiled by XC16++.
+The compiler is subject to the original `gcc` license, i.e. GNU General Public
+License, version 3 or later. A copy of the GNU General Public License is
+attached (see file `LICENSE-GPL3.txt`).
 
-The example project (*example-project/* subdirectory) and support files
-(*support-files/* subdirectory) are released to public domain, under the terms
-of the "UNLICENSE" (see file *LICENSE-UNLICENSE*).
+Please note that the GPL **does not** extend to programs compiled by XC16++,
+whose licensing terms are entirely up to the user. You will probably want to
+link your firmware against Microchip's support libraries (`libc`, `libm`, ...),
+that have their own licensing terms (see XC16's license).
+
+The automatic tests (`autotests/` subdirectory) are released under the same
+license as the compiler: GNU General Public License, version 3 or later.
+
+The build scripts (`build-scripts/` subdirectory) and the example project
+(`example-project/` subdirectory) are released to public domain, under the terms
+of the "UNLICENSE" (see file `LICENSE-UNLICENSE.txt`).

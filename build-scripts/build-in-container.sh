@@ -56,8 +56,8 @@ do
 	pushd "../$RELEASE_DIRNAME"
 	cp -r --target-directory=. \
 		"$INSTALL_DIR"/bin/ \
-		../../../LICENSE-GPL3 \
-		../../../LICENSE-UNLICENSE \
+		../../../LICENSE-GPL3.txt \
+		../../../LICENSE-UNLICENSE.txt \
 		../../../README.md \
 		../../../example-project/
 
@@ -74,7 +74,7 @@ do
 			../../create_xc16plusplus_symlinks.cmd > bin/create_xc16plusplus_symlinks.cmd
 
 		# Convert text files to DOS line endings
-		unix2dos LICENSE-GPL3 LICENSE-UNLICENSE README.md \
+		unix2dos LICENSE-GPL3.txt LICENSE-UNLICENSE.txt README.md \
 			bin/create_xc16plusplus_symlinks.cmd \
 			example-project/*
 
