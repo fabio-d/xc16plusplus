@@ -50,7 +50,7 @@ Between the two phases, which can potentially be executed on different machines
 and/or operating systems, intermediate test data is serialized as a ZIP file
 called **test bundle**.
 
-Aftewrwards, given an existing XC16++ installation (e.g. XC16 v1.00 with XC16++
+Afterwards, given an existing XC16++ installation (e.g. XC16 v1.00 with XC16++
 executables, installed in `/opt/microchip/xc16/v1.00`) the *compilation* step
 can be executed with:
 ```
