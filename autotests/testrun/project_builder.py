@@ -86,10 +86,9 @@ class ProjectBuilder:
                     compiler_flags = self.cxxflags
                     name_without_ext = os.path.basename(source_path[:-4])
                 else:
-                    raise ValueError('Invalid file extension')
+                    raise ValueError('Invalid file extension: %s' % source_path)
 
                 object_file_name = '%s.o' % name_without_ext
-                log_file_name = '%s.log' % name_without_ext
 
                 cmd_line = \
                     [

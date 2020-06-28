@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import shutil
 import sys
 from functools import partial
 from typing import Generator, List, Tuple
@@ -11,6 +12,7 @@ from .bundle_io import BundleReader, BundleRecord, BundleWriter
 from .call_in_subprocess import call_and_capture_output
 from .compiler_version import CompilerVersion
 from .firmware_runner import FirmwareRunner
+from .project_builder import ProjectBuilder
 from .report_writer import ReportWriter
 from .test_loader import TestLoader, error_if_unexpected_working_directory
 
@@ -52,18 +54,23 @@ def load_test_directories(test_directories):
             yield test_instance, test_loader.package_name
 
 
-def do_compile(args):
+def make_compilation_env(compiler_path):
     # Extract compiler version for its path
     compiler_version_match = re.search(r'^(|.*[\\/])(v[0-9]+\.[0-9]+)[\\/]*',
-                                       args.compiler_path)
+                                       compiler_path)
     if compiler_version_match is None:
         exit('Failed to infer compiler version for compiler_path')
 
     # Create CompilationEnvironment object
-    compilation_env = CompilationEnvironment(
+    return CompilationEnvironment(
         compiler_version=CompilerVersion(compiler_version_match.group(2)),
-        compiler_abspath=os.path.abspath(args.compiler_path)
+        compiler_abspath=os.path.abspath(compiler_path)
     )
+
+
+def do_compile(args):
+    # Create CompilationEnvironment object
+    compilation_env = make_compilation_env(args.compiler_path)
 
     # Execute each Test's compilation step and store the outcome in the output
     # bundle
@@ -151,6 +158,42 @@ def do_validate(args):
         sys.exit('One or more tests FAILED')
 
 
+def do_compilefw(args):
+    # Create CompilationEnvironment object
+    compilation_env = make_compilation_env(args.compiler_path)
+
+    # Create ProjectBuilder object
+    project = ProjectBuilder(
+        compilation_env.compiler_abspath,
+        compilation_env.compiler_version,
+        args.omf,
+        (args.target_family, args.target_chip)
+    )
+
+    project.source_files = {
+        os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         '../../example-project/minilibstdc++.cpp')): []
+    }
+
+    for fn in os.listdir(args.srcdir):
+        if fn.endswith('.c') or fn.endswith('.cpp'):
+            full_path = os.path.abspath(os.path.join(args.srcdir, fn))
+            project.source_files[full_path] = []
+
+    output = project.build()
+    target_dir = os.path.join(args.srcdir, 'compilefw-output')
+    if os.path.isdir(target_dir):
+        shutil.rmtree(target_dir)
+    os.mkdir(target_dir)
+    for fn, contents in output.output_files.items():
+        with open(os.path.join(target_dir, fn), 'wb') as fp:
+            fp.write(contents)
+
+    if not output.success:
+        sys.exit('Compilation failed')
+
+
 def do_runfw(args):
     mplabx_abspath = os.path.abspath(args.mplabx_path)
     with open(args.firmware, 'rb') as fp:
@@ -197,16 +240,33 @@ def main():
                                  help='output report file', required=True)
     parser_validate.set_defaults(func=do_validate)
 
+    # parser for 'compilefw' command
+    parser_compilefw = subparsers.add_parser('compilefw',
+                                             help='compile firmware')
+    parser_compilefw.add_argument('compiler_path',
+                                  help='path to compiler installation '
+                                       'directory, such as '
+                                       '/opt/microchip/v1.00')
+    parser_compilefw.add_argument('target_family',
+                                  help='name of the target family')
+    parser_compilefw.add_argument('target_chip',
+                                  help='name of the target chip')
+    parser_compilefw.add_argument('omf', choices=('coff', 'elf'),
+                                  help='Objetc file format')
+    parser_compilefw.add_argument('srcdir',
+                                  help='Source and output directory')
+    parser_compilefw.set_defaults(func=do_compilefw)
+
     # parser for 'runfw' command
     parser_runfw = subparsers.add_parser('runfw',
                                          help='run firmware with UART output')
     parser_runfw.add_argument('mplabx_path',
                               help='path to MPLAB X installation directory, '
                                    'such as /opt/microchip/mplabx/v5.30')
-    parser_runfw.add_argument('firmware', metavar='FIRMWARE.hex',
-                              help='HEX image of firmware')
     parser_runfw.add_argument('target',
                               help='name of chip to be emulated')
+    parser_runfw.add_argument('firmware', metavar='FIRMWARE.hex',
+                              help='HEX image of firmware')
     parser_runfw.set_defaults(func=do_runfw)
 
     args = parser.parse_args()
