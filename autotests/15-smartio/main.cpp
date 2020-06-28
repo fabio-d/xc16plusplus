@@ -2,8 +2,6 @@
 
 int main (int argc, char *argv[])
 {
-	do_disabled_smartio();
-
 	do_arg_none();
 	do_arg_char();
 	do_arg_string();
@@ -11,7 +9,7 @@ int main (int argc, char *argv[])
 	do_arg_float();
 	do_arg_float_and_string();
 
-#if __XC16_VERSION__ >= 1030
+#if WITH_LONGLONG
 	do_arg_longlong();
 #endif
 

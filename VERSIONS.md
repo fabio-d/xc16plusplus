@@ -208,7 +208,7 @@ compiler options, replace them respectively with `-std=gnu++98` or
 - [Microchip's XC16 v1.36 Linux installer](http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.36b-full-install-linux-installer.run) (sha1 8103cca06d65b849c153c39513b1a6df58fa0bf2)
 - [Microchip's XC16 v1.36 Windows installer](http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.36b-full-install-windows-installer.exe) (sha1 0f49032de26af810aa90265b6d4385496d5ac7e7)
 - [Microchip's XC16 v1.36 OSX installer](http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.36b-full-install-osx-installer.dmg) (sha1 0095ee545343121ed2668cc0899e0d5cfb4d4c0a)
-- [Microchip's XC16 v1.36 source archive](http://ww1.microchip.com/downloads/Secure/en/DeviceDoc/v1.36b.src.zip) (sha1 29dc4f8bb42fae9682f1548993885be3556a891e)
+- [Microchip's XC16 v1.36 source archive](http://ww1.microchip.com/downloads/Secure/en/DeviceDoc/v1.36b.src.zip) (sha1 ad44b387b3a5859a8f8755190c427e26b02252f4)
 
 ## v1.40
 

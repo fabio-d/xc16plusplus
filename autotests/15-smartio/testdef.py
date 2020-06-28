@@ -4,20 +4,12 @@ from testrun import *
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 
-EXPECTED_SYMBOLS = {
-    'disabled_smartio.o': '_printf',
-    'arg_none.o': '_puts',
-    'arg_char.o': '__printf_cdnopuxX',
-    'arg_string.o': '__printf_s',
-    'arg_int.o': '__printf_cdnopuxX',
-    'arg_float.o': '__printf_fF',
-    'arg_float_and_string.o': '__printf_fFs',
-    'arg_longlong.o': '__printf_cdnopuxXL'
-}
 
+# Notes on the LONGLONG modifier:
+#  - It is only supported since v1.30
+#  - It only works if smart I/O is enabled
 
-@register_test(omf=['elf', 'coff'])
-class MyTest(Test):
+class _BaseTestSmartIOTest(Test):
     def __init__(self, omf):
         self.omf = omf
 
@@ -56,22 +48,22 @@ class MyTest(Test):
         ]
 
         # The L modifier is only supported since v1.30
-        if compilation_env.compiler_version >= (1, 30):
+        if compilation_env.compiler_version >= (1, 30) \
+                and not self.skip_longlong:
             with_longlong = True
             source_files_default_opts.append(
                 os.path.join(THIS_DIR, 'arg_longlong.cpp'))
         else:
             with_longlong = False
 
-        # Compile all files with standard flags, except for disabled_smartio.cpp
-        prj.source_files = {fn: [] for fn in source_files_default_opts}
-        prj.source_files[os.path.join(THIS_DIR, 'disabled_smartio.cpp')] \
-            = ['-msmart-io=0']  # disable smart I/O for this file
+        opts = [*self.default_opts, '-DWITH_LONGLONG=%d' % with_longlong]
+        prj.source_files = {fn: opts
+                            for fn in source_files_default_opts}
 
         compiler_output = prj.build()
         if compiler_output.success:
             files_to_be_checked = \
-                set(EXPECTED_SYMBOLS) & set(compiler_output.output_files)
+                set(self.EXPECTED_SYMBOLS) & set(compiler_output.output_files)
 
             # Extract object files
             with tempfile.TemporaryDirectory() as tmpdir:
@@ -87,7 +79,8 @@ class MyTest(Test):
 
             as_expected = True
             for file_name in printf_symbols:
-                if printf_symbols[file_name] != [EXPECTED_SYMBOLS[file_name]]:
+                expected_symbol = self.EXPECTED_SYMBOLS[file_name]
+                if printf_symbols[file_name] != [expected_symbol]:
                     print('Expected symbol mismatch!', file_name)
                     as_expected = False
 
@@ -120,3 +113,34 @@ class MyTest(Test):
             final_outcome=Outcome.PASSED if good else Outcome.FAILED,
             files={'uart.txt': out.uart_output})
 
+
+@register_test(omf=['elf', 'coff'])
+class TestWithSmartIO(_BaseTestSmartIOTest):
+    default_opts = []
+    skip_longlong = False
+
+    EXPECTED_SYMBOLS = {
+        'arg_none.o': '_puts',
+        'arg_char.o': '__printf_cdnopuxX',
+        'arg_string.o': '__printf_s',
+        'arg_int.o': '__printf_cdnopuxX',
+        'arg_float.o': '__printf_fF',
+        'arg_float_and_string.o': '__printf_fFs',
+        'arg_longlong.o': '__printf_cdnopuxXL'
+    }
+
+
+@register_test(omf=['elf', 'coff'])
+class TestWithoutSmartIO(_BaseTestSmartIOTest):
+    default_opts = ['-msmart-io=0']  # disable smart I/O
+    skip_longlong = True  # it seems to be unsupported by the regular printf
+
+    EXPECTED_SYMBOLS = {
+        'arg_none.o': '_puts',
+        'arg_char.o': '_printf',
+        'arg_string.o': '_printf',
+        'arg_int.o': '_printf',
+        'arg_float.o': '_printf',
+        'arg_float_and_string.o': '_printf',
+        'arg_longlong.o': '_printf'
+    }
