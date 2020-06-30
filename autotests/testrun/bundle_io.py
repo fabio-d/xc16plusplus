@@ -67,7 +67,7 @@ class BundleWriter:
         # Create a human-readable unique folder name
         self.counter += 1
         test_repr_encoded = urllib.parse.quote(repr(test_instance),
-                                               safe="=()[]{}'")
+                                               safe="=()[]{}' ,")
         base_folder = '%08d,%s,%s' \
                       % (self.counter, test_package_name, test_repr_encoded)
 

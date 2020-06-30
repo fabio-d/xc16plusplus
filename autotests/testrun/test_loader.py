@@ -1,17 +1,19 @@
+import functools
 import importlib
 import itertools
 import os
 
 from .call_in_subprocess import call_and_capture_output
 
-# helper variable used during the loading phase by TestLoader
+# helper variables used during the loading phase by TestLoader
 LOADED_TESTS = None
+COMPILATION_ENV = None
 
 
 def register_test_with_matrix_generator(gen_func):
     def wrapper(cls):
         if LOADED_TESTS is not None:  # do not run it while unpickling
-            for assignment in gen_func():
+            for assignment in gen_func(COMPILATION_ENV):
                 LOADED_TESTS.append(cls(**assignment))
         return cls
 
@@ -19,7 +21,7 @@ def register_test_with_matrix_generator(gen_func):
 
 
 def register_test(**matrix):
-    def matrix_generator():
+    def matrix_generator(compilation_env):
         keys = []
         lists_of_values = []
         for key, list_of_values in matrix.items():
@@ -42,7 +44,7 @@ def error_if_unexpected_working_directory():
 
 
 class TestLoader:
-    def __init__(self, test_directory):
+    def __init__(self, test_directory, compilation_env):
         self.test_directory = test_directory
 
         # Transform test_directory into a package name (sibling of this package)
@@ -53,18 +55,20 @@ class TestLoader:
 
         self.package_name = test_directory_rel.replace(os.pathsep, '.')
 
-        load_test_output = call_and_capture_output(self._load_tests)
+        load_test_output = call_and_capture_output(
+            functools.partial(self._load_tests, compilation_env))
         if load_test_output.exception is None:
             self.loaded_tests = load_test_output.result
         else:
             raise RuntimeError('Failed to load tests from test directory %s'
                                % test_directory) from load_test_output.exception
 
-    def _load_tests(self):
-        global LOADED_TESTS
+    def _load_tests(self, compilation_env):
+        global LOADED_TESTS, COMPILATION_ENV
 
         # Import the target module
         LOADED_TESTS = []
+        COMPILATION_ENV = compilation_env
         importlib.import_module('%s.testdef' % self.package_name)
 
         # Since every TestLoader instance imports its test module is a dedicated

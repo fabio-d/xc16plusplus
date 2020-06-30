@@ -17,7 +17,7 @@ from .report_writer import ReportWriter
 from .test_loader import TestLoader, error_if_unexpected_working_directory
 
 
-def load_test_directories(test_directories):
+def load_test_directories(test_directories, compilation_env):
     """
     Load test definitions from a list of directories.
 
@@ -26,6 +26,8 @@ def load_test_directories(test_directories):
                              subdirectory of the root of the test hierarchy
                              (i.e. the 'autotests' directory).
     :type test_directories: List[str]
+    :param compilation_env: The compilation environment for the loaded tests.
+    :type compilation_env: CompilationEnvironment
     :return: (test_instance, test_package_name) tuples
     :rtype: Generator[Tuple[Test, str]]
     """
@@ -37,7 +39,7 @@ def load_test_directories(test_directories):
     seen_package_names = set()
     for test_directory in test_directories:
         # Load tests from current test_directory
-        test_loader = TestLoader(test_directory)
+        test_loader = TestLoader(test_directory, compilation_env)
 
         if test_loader.package_name in seen_package_names:
             print('Warning!', test_loader.package_name,
@@ -76,7 +78,7 @@ def do_compile(args):
     # bundle
     with BundleWriter(args.output) as bw:
         for test_instance, test_package_name \
-                in load_test_directories(args.test_directory):
+                in load_test_directories(args.test_directory, compilation_env):
             print('Compiling test', test_instance, 'defined in',
                   test_package_name, file=sys.stderr)
 

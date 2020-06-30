@@ -43,7 +43,7 @@ class ProjectBuilder:
             '-p' + target_chip,
             '--report-mem',
             '--script', ldscript,
-            '--heap=512',
+            '--heap=128',
             '-L' + os.path.join(compiler_abspath, 'lib'),
             '-L' + os.path.join(compiler_abspath, 'lib', target_family)
         ]
