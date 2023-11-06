@@ -47,17 +47,27 @@ class ProjectBuilder:
             '-L' + os.path.join(compiler_abspath, 'lib'),
             '-L' + os.path.join(compiler_abspath, 'lib', target_family)
         ]
-        self.libs = [
-            '-lc',
-            '-lpic30',
-            '-lm'
-        ]
+
+        self.libs = ['--start-group']
+
+        if compiler_version < (2, 0):
+            self.libs += ['-lc',
+                          '-lpic30'
+                          ]
+        else:
+            self.libs += ['-lc99',
+                          '-lc99-pic30'
+                          ]
+
+        self.libs += ['-lm',
+                      '--end-group'
+                      ]
 
         if compiler_version >= (1, 20):
             self.cflags.append('-mno-eds-warn')
             self.ldflags.append('--local-stack')
 
-        if compiler_version >= (1, 25):
+        if (1, 25) <= compiler_version < (2, 0):
             self.cflags.append('-no-legacy-libc')
 
         self.cxxflags = self.cflags + [

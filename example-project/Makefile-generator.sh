@@ -15,6 +15,23 @@ case "$2" in
 		exit 1
 esac
 
+# Tests whether the current XC16 version is older than the specified one
+# e.g. XC16VER=v1.23 xc16ver_lt v1.25 -> true
+function xc16ver_lt()
+{
+	CURRENT_MAJOR=$(echo "$XC16VER" | cut -d. -f1 | tr -d v)
+	CURRENT_MINOR=$(echo "$XC16VER" | cut -d. -f2)
+	TEST_MAJOR=$(echo "$1" | cut -d. -f1 | tr -d v)
+	TEST_MINOR=$(echo "$1" | cut -d. -f2)
+
+	if [ $CURRENT_MAJOR -eq $TEST_MAJOR ];
+	then
+		[ $CURRENT_MINOR -lt $TEST_MINOR ]
+	else
+		[ $CURRENT_MAJOR -lt $TEST_MAJOR ]
+	fi
+}
+
 # Tests whether the current XC16 version is equal or newer than the specified one
 # e.g. XC16VER=v1.23 xc16ver_ge v1.22 -> true
 function xc16ver_ge()
@@ -41,10 +58,19 @@ then
 	LDFLAGS+=(--local-stack)
 fi
 
-if xc16ver_ge v1.25;
+if xc16ver_ge v1.25 && xc16ver_lt v2.00;
 then
 	CFLAGS+=(-no-legacy-libc)
 fi
+
+if xc16ver_ge v2.00;
+then
+	LIBS=('-lc99' '-lc99-pic30')
+else
+	LIBS=('-lc' '-lpic30')
+fi
+
+LIBS+=(-lm)
 
 cat <<EOF
 # Change these values to the right values for your chip
@@ -74,7 +100,7 @@ CXXFLAGS := \$(CFLAGS) -D__bool_true_and_false_are_defined -fno-exceptions -fno-
 # Options for the linker
 LDSCRIPT := \$(XC16DIR)/support/\$(TARGET_FAMILY)/gld/p\$(TARGET_CHIP).gld
 LDFLAGS := ${LDFLAGS[*]}
-LIBS := -lc -lpic30 -lm
+LIBS := --start-group ${LIBS[*]} --end-group
 
 .DEFAULT_GOAL := all
 .PHONY: all clean

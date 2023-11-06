@@ -102,8 +102,11 @@ intstar __psv__ psv_pointer_to_int __attribute__((space(psv)));
    make sure that your stack is located in the low 32K region (the
    `--local-stack` linker option, enabled by default, does exactly this).
  * The legacy C library (i.e. compiler option `-legacy-libc`) is not supported.
-   If your XC16 version is 1.25 or newer, where `-legacy-libc` has become the
-   default, make sure you set the `-no-legacy-libc` compiler option.
+   If your XC16 version is between 1.25 and 1.70, where `-legacy-libc` is the
+   default, make sure you set the `-no-legacy-libc` compiler option. Starting
+   from version 2.00 the options `-legacy-libc` and `-no-legacy-libc` are no
+   longer supported, because the compiler will always use a new library to
+   support the C99 standard.
 
 ## Some tips
  * Include *example-project/minilibstdc++.cpp* with your project (even if you do
