@@ -1,4 +1,22 @@
 #!/bin/bash
+
+# Tests whether the current XC16 version is equal or newer than the specified one
+# e.g. $XC16_VERSION=v1.23 xc16ver_ge v1.22 -> true
+function xc16ver_ge()
+{
+	CURRENT_MAJOR=$(echo "$XC16_VERSION" | cut -d. -f1 | tr -d v)
+	CURRENT_MINOR=$(echo "$XC16_VERSION" | cut -d. -f2)
+	TEST_MAJOR=$(echo "$1" | cut -d. -f1 | tr -d v)
+	TEST_MINOR=$(echo "$1" | cut -d. -f2)
+
+	if [ $CURRENT_MAJOR -eq $TEST_MAJOR ];
+	then
+		[ $CURRENT_MINOR -ge $TEST_MINOR ]
+	else
+		[ $CURRENT_MAJOR -ge $TEST_MAJOR ]
+	fi
+}
+
 cd "$(dirname "$0")"
 
 if [ "$#" -le 1 ];
@@ -73,6 +91,13 @@ do
 		sed "s,\(C:\\\\Program.*\)\\\\v[0-9]\.[0-9]*\\\\bin,\1\\\\$XC16_VERSION\\\\bin," \
 			../../create_xc16plusplus_symlinks.cmd > bin/create_xc16plusplus_symlinks.cmd
 
+		if xc16ver_ge "v2.00";
+		then
+			grep -F -v "@if %success% equ 1 call:createcopy \"coff-pa.exe\" \"coff-paplus.exe\"" \
+				bin/create_xc16plusplus_symlinks.cmd > bin/create_xc16plusplus_symlinks.cmd_tmp
+			mv bin/create_xc16plusplus_symlinks.cmd_tmp bin/create_xc16plusplus_symlinks.cmd
+		fi
+
 		# Convert text files to DOS line endings
 		unix2dos LICENSE-GPL3.txt LICENSE-UNLICENSE.txt README.md \
 			bin/create_xc16plusplus_symlinks.cmd \
@@ -83,7 +108,10 @@ do
 		# Create symbolic links
 		ln -s xc16-cc1 bin/xc16-cc1plus
 		ln -s xc16-gcc bin/xc16-g++
-		ln -s coff-pa bin/bin/coff-paplus
+		if ! xc16ver_ge "v2.00";
+		then
+			ln -s coff-pa bin/bin/coff-paplus
+		fi
 		ln -s elf-pa bin/bin/elf-paplus
 
 		cd ..

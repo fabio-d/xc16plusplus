@@ -26,6 +26,9 @@ class _CompileTestMixin:
         self.omf = omf
 
     def compile(self, compilation_env):
+        if compilation_env.compiler_version >= (2, 0) and self.omf == 'coff':
+            return CompilationOutput(Outcome.UNSUPPORTED, dict())
+
         prj = ProjectBuilder(
             compilation_env.compiler_abspath,
             compilation_env.compiler_version,

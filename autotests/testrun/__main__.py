@@ -98,6 +98,9 @@ def do_compile(args):
             print('Compiling test', test_instance, 'defined in',
                   test_package_name, '->', outcome_text, file=sys.stderr)
 
+            if compilation_output.outcome == Outcome.UNSUPPORTED:
+                continue
+
             # Store the test and its outcome in the output bundle
             bw.add_record(BundleRecord(
                 test_instance, test_package_name,

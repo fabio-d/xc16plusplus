@@ -9,6 +9,7 @@ class Outcome(Enum):
     PASSED = "PASSED"
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
+    UNSUPPORTED = "UNSUPPORTED"
 
 
 class Test(ABC):
