@@ -2,9 +2,11 @@
 
 #include "derivclass.h"
 
-baseclass *derivclass::create_instance()
+static derivclass instance;
+
+baseclass *derivclass::get_instance()
 {
-	return new derivclass();
+	return &instance;
 }
 
 derivclass::derivclass()

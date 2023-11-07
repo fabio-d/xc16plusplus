@@ -5,7 +5,7 @@
 
 int main (int argc, char *argv[])
 {
-	baseclass *inst = derivclass::create_instance();
+	baseclass *inst = derivclass::get_instance();
 	inst->nonvirtualmethod();
 	inst->virtualmethod1();
 	inst->virtualmethod2();

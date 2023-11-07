@@ -5,7 +5,7 @@
 class derivclass : public baseclass
 {
 	public:
-		static baseclass *create_instance();
+		static baseclass *get_instance();
 
 		derivclass();
 		~derivclass();
