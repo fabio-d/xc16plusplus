@@ -49,6 +49,13 @@ set -ex
 ./build-in-container.sh v1.41 linux windows osx
 ./build-in-container.sh v1.49 linux windows osx
 ./build-in-container.sh v1.50 linux windows osx
+./build-in-container.sh v1.59 linux windows osx
+./build-in-container.sh v1.60 linux windows osx
+./build-in-container.sh v1.61 linux windows osx
+./build-in-container.sh v1.70 linux windows osx
+./build-in-container.sh v2.00 linux windows osx
+./build-in-container.sh v2.09 linux windows osx
+./build-in-container.sh v2.10 linux windows osx
 
 # Compile the tests using the newly-built compilers.
 #
@@ -59,8 +66,8 @@ set -ex
 # Note: xc16-vN.NN-OS.tar.xz archives must be present in advance! Install XC16
 # and use the pack-xc16-binaries.sh tool to create them.
 #
-# Note 2: v1.49 is a "Functional Safety" release whose XC16 executables will not
-# run without a specific license.
+# Note 2: v1.49, v1.59, v1.09 are "Functional Safety" releases whose XC16
+# executables will not run without a specific license.
 ./test-compile-in-container.sh v1.00 linux windows osx
 ./test-compile-in-container.sh v1.10 linux windows osx
 ./test-compile-in-container.sh v1.11 linux windows osx
@@ -82,6 +89,13 @@ set -ex
 ./test-compile-in-container.sh v1.41 linux windows osx
 #./test-compile-in-container.sh v1.49 linux windows osx
 ./test-compile-in-container.sh v1.50 linux windows osx
+#./test-compile-in-container.sh v1.59 linux windows osx
+./test-compile-in-container.sh v1.60 linux windows osx
+./test-compile-in-container.sh v1.61 linux windows osx
+./test-compile-in-container.sh v1.70 linux windows osx
+./test-compile-in-container.sh v2.00 linux windows osx
+#./test-compile-in-container.sh v2.09 linux windows osx
+./test-compile-in-container.sh v2.10 linux windows osx
 
 # Validate tests
 #

@@ -52,7 +52,7 @@ XC16PLUSPLUS_REVISION=r$(sed -n 's/^XC16PLUSPLUS_REVISION=\([0-9]*\).*/\1/p' bui
 
 for TARGET_OS in $*;
 do
-	if [ "$XC16_VERSION" == "v1.50" ];
+	if xc16ver_ge "v1.50";
 	then
 		TARGET_OS_WITH_BITS="$TARGET_OS"64
 	else
