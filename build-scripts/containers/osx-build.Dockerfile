@@ -11,7 +11,7 @@ RUN cd /opt/osxcross && \
 
 # Download further auxiliary packages
 RUN wget https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.5.sdk.tar.xz -O /opt/osxcross/tarballs/MacOSX10.5.sdk.tar.xz
-RUN wget https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2 -O /opt/osxcross/tarballs/gcc-5.3.0.tar.bz2
+RUN wget http://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2 -O /opt/osxcross/tarballs/gcc-5.3.0.tar.bz2
 
 # Build clang and remove temporary build directories
 RUN cd /opt/osxcross && UNATTENDED=y ./build.sh && rm -rf /opt/osxcross/build/*/
